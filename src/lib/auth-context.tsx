@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import {
+  GithubAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   updateProfile,
   type User,
@@ -21,11 +23,17 @@ interface AuthContextType {
   firebaseUser: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGithub: () => Promise<void>;
   register: (email: string, username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+const githubProvider = new GithubAuthProvider();
+
+githubProvider.addScope("read:user");
+githubProvider.addScope("user:email");
+githubProvider.setCustomParameters({ allow_signup: "true" });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
@@ -52,6 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password);
   }
 
+  async function loginWithGithub() {
+    await signInWithPopup(auth, githubProvider);
+  }
+
   async function register(email: string, username: string, password: string) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: username });
@@ -63,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, login, loginWithGithub, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

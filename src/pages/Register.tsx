@@ -4,20 +4,21 @@ import { useAuth } from "@/lib/auth-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowRight } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 
 export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingMode, setLoadingMode] = useState<"password" | "github" | null>(null);
   const [, setLocation] = useLocation();
-  const { register } = useAuth();
+  const { register, loginWithGithub } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    setLoading(true);
+    setLoadingMode("password");
     try {
       await register(email, username, password);
       setLocation("/");
@@ -33,7 +34,31 @@ export default function Register() {
         setErrorMsg("GX-AUTH-013: Registration failed. Please try again.");
       }
     } finally {
-      setLoading(false);
+      setLoadingMode(null);
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    setErrorMsg("");
+    setLoadingMode("github");
+    try {
+      await loginWithGithub();
+      setLocation("/");
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/account-exists-with-different-credential") {
+        setErrorMsg("GX-AUTH-020: This email is already linked to another sign-in method.");
+      } else if (code === "auth/popup-blocked") {
+        setErrorMsg("GX-AUTH-021: Allow popups in your browser to continue with GitHub.");
+      } else if (code === "auth/popup-closed-by-user") {
+        setErrorMsg("GX-AUTH-022: GitHub sign-in was canceled before completion.");
+      } else if (code === "auth/cancelled-popup-request") {
+        setErrorMsg("GX-AUTH-023: Another sign-in window is already open.");
+      } else {
+        setErrorMsg("GX-AUTH-024: GitHub sign-in failed. Please try again.");
+      }
+    } finally {
+      setLoadingMode(null);
     }
   };
 
@@ -59,6 +84,23 @@ export default function Register() {
               <p>{errorMsg}</p>
             </div>
           )}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-14 text-base border-white/15 bg-white/5 text-white hover:bg-white/10 rounded-lg"
+            disabled={loadingMode !== null}
+            onClick={handleGithubSignIn}
+          >
+            <FaGithub className="w-5 h-5" />
+            {loadingMode === "github" ? "Connecting to GitHub..." : "Continue with GitHub"}
+          </Button>
+
+          <div className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/35">
+            <div className="h-px flex-1 bg-white/10" />
+            <span>Or create with email</span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
 
           <div className="space-y-4">
             <Input
@@ -91,9 +133,9 @@ export default function Register() {
           <Button
             type="submit"
             className="w-full h-14 text-lg font-bold bg-primary hover:bg-primary/90 text-white rounded-lg group"
-            disabled={loading}
+            disabled={loadingMode !== null}
           >
-            {loading ? (
+            {loadingMode === "password" ? (
               "Creating Account..."
             ) : (
               <span className="flex items-center gap-2">
