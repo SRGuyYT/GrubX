@@ -15,8 +15,9 @@ import { toast } from "sonner";
 
 export default function TitleDetail() {
   const [, params] = useRoute("/title/:mediaType/:id");
-  const mediaType = params?.mediaType as "movie" | "tv";
-  const id = params?.id ?? "";
+  const routeParams = params ?? { mediaType: "movie", id: "" };
+  const mediaType = routeParams.mediaType as "movie" | "tv";
+  const id = routeParams.id;
 
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState<number>(1);

@@ -1,5 +1,8 @@
-const PROXY_BASE = import.meta.env.VITE_TMDB_PROXY_BASE ?? "https://api.themoviedb.org/3";
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY ?? "";
+const DEFAULT_TMDB_PROXY_BASE = "https://mtd.sky0cloud.dpdns.org";
+const DEFAULT_TMDB_API_KEY = "bda755b29c8939787eded30edf76bec5";
+
+const PROXY_BASE = (import.meta.env.VITE_TMDB_PROXY_BASE ?? DEFAULT_TMDB_PROXY_BASE).replace(/\/$/, "");
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY ?? DEFAULT_TMDB_API_KEY;
 
 export async function tmdbFetch(path: string, params: Record<string, string> = {}) {
   const url = new URL(`${PROXY_BASE}${path}`);

@@ -23,7 +23,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <Navbar />
       <main className="flex-1 pt-16">{children}</main>
       <footer className="py-8 text-center text-sm text-muted-foreground border-t border-border/20 mt-12 bg-card/30">
-        <p>© {new Date().getFullYear()} Grubed X. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Grubed X. All rights reserved.</p>
         <p className="mt-2 text-xs opacity-60">Cinematic Streaming Experience</p>
       </footer>
     </div>
