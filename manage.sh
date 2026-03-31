@@ -5,47 +5,219 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-require_command() {
-  if ! command -v "$1" >/dev/null 2>&1; then
-    echo "Error: required command '$1' was not found in PATH." >&2
-    exit 1
-  fi
+HOST="${HOST:-0.0.0.0}"
+DEV_PORT="${DEV_PORT:-3000}"
+PREVIEW_PORT="${PREVIEW_PORT:-1500}"
+STABLE_PORT="${STABLE_PORT:-9000}"
+ACTION="${1:-menu}"
+
+log() {
+  printf '[grubedx] %s\n' "$*"
 }
 
-require_command pnpm
+fail() {
+  printf '[grubedx] Error: %s\n' "$*" >&2
+  exit 1
+}
 
-echo "Installing dependencies with pnpm..."
-pnpm install
+require_command() {
+  command -v "$1" >/dev/null 2>&1 || fail "required command '$1' was not found in PATH"
+}
 
-echo "Building Grubed X..."
-pnpm build
+ensure_pnpm() {
+  if command -v pnpm >/dev/null 2>&1; then
+    PNPM_CMD=(pnpm)
+    return
+  fi
 
-echo
-echo "1) Dev Mode"
-echo "2) Production Preview"
-read -rp "Start (1) Dev Mode or (2) Production Preview? " selection
+  require_command corepack
+  log "pnpm was not found. Enabling Corepack-managed pnpm..."
+  corepack enable >/dev/null 2>&1 || true
+  PNPM_CMD=(corepack pnpm)
+}
 
-case "$selection" in
-  1)
-    echo "Starting Vite dev server on 0.0.0.0:3000..."
-    exec pnpm dev --host 0.0.0.0 --port 3000
-    ;;
-  2)
-    if command -v serve >/dev/null 2>&1; then
-      echo "Serving dist with global 'serve' on 0.0.0.0:4173..."
-      exec serve -s dist -l tcp://0.0.0.0:4173
+run_pnpm() {
+  "${PNPM_CMD[@]}" "$@"
+}
+
+ensure_env_file() {
+  if [[ -f .env ]]; then
+    return
+  fi
+
+  if [[ -f .env.example ]]; then
+    log "'.env' was missing. Renaming '.env.example' to '.env'..."
+    mv .env.example .env
+    return
+  fi
+
+  log "No '.env' or '.env.example' file found. Continuing without env bootstrap."
+}
+
+install_dependencies() {
+  ensure_pnpm
+  ensure_env_file
+  log "Installing dependencies..."
+  run_pnpm install
+}
+
+typecheck_app() {
+  ensure_pnpm
+  ensure_env_file
+  log "Running TypeScript typecheck..."
+  run_pnpm typecheck
+}
+
+build_app() {
+  ensure_pnpm
+  ensure_env_file
+  log "Building production bundle..."
+  run_pnpm build
+}
+
+full_setup() {
+  install_dependencies
+  typecheck_app
+  build_app
+}
+
+clean_install() {
+  ensure_pnpm
+  ensure_env_file
+  log "Removing node_modules and lockfile-pinned install state..."
+  rm -rf node_modules
+  log "Reinstalling dependencies from scratch..."
+  run_pnpm install --force
+}
+
+serve_dist() {
+  local mode="$1"
+  local port="$2"
+
+  ensure_pnpm
+  ensure_env_file
+
+  if [[ ! -d dist ]]; then
+    log "'dist' was not found. Building before ${mode} serve..."
+    build_app
+  fi
+
+  if command -v serve >/dev/null 2>&1; then
+    log "Serving 'dist' in ${mode} mode with global serve on ${HOST}:${port}..."
+    exec serve -s dist -l "tcp://${HOST}:${port}"
+  fi
+
+  if run_pnpm exec serve --version >/dev/null 2>&1; then
+    log "Serving 'dist' in ${mode} mode with local serve on ${HOST}:${port}..."
+    exec "${PNPM_CMD[@]}" exec serve -s dist -l "tcp://${HOST}:${port}"
+  fi
+
+  log "No static server was found. Falling back to 'pnpm dlx serve' in ${mode} mode on ${HOST}:${port}..."
+  exec "${PNPM_CMD[@]}" dlx serve -s dist -l "tcp://${HOST}:${port}"
+}
+
+start_dev() {
+  ensure_pnpm
+  ensure_env_file
+
+  if [[ ! -d node_modules ]]; then
+    log "'node_modules' missing. Installing dependencies first..."
+    install_dependencies
+  fi
+
+  log "Starting Vite dev server on ${HOST}:${DEV_PORT}..."
+  exec "${PNPM_CMD[@]}" dev --host "${HOST}" --port "${DEV_PORT}"
+}
+
+doctor() {
+  ensure_pnpm
+  log "Environment summary"
+  printf '  root: %s\n' "$ROOT_DIR"
+  printf '  host: %s\n' "$HOST"
+  printf '  dev_port: %s\n' "$DEV_PORT"
+  printf '  preview_port: %s\n' "$PREVIEW_PORT"
+  printf '  stable_port: %s\n' "$STABLE_PORT"
+  printf '  node: %s\n' "$(node --version 2>/dev/null || echo 'missing')"
+  printf '  pnpm: %s\n' "$(run_pnpm --version 2>/dev/null || echo 'unavailable')"
+  printf '  env_file: %s\n' "$(
+    if [[ -f .env ]]; then
+      echo ".env"
+    elif [[ -f .env.example ]]; then
+      echo ".env.example"
+    else
+      echo "missing"
     fi
+  )"
+  printf '  dist: %s\n' "$([[ -d dist ]] && echo present || echo missing)"
+  printf '  node_modules: %s\n' "$([[ -d node_modules ]] && echo present || echo missing)"
+}
 
-    if pnpm exec serve --version >/dev/null 2>&1; then
-      echo "Serving dist with local 'serve' on 0.0.0.0:4173..."
-      exec pnpm exec serve -s dist -l tcp://0.0.0.0:4173
-    fi
+show_help() {
+  cat <<EOF
+Usage: ./manage.sh [command]
 
-    echo "No static file server was found. Falling back to 'pnpm dlx serve' on 0.0.0.0:4173..."
-    exec pnpm dlx serve -s dist -l tcp://0.0.0.0:4173
-    ;;
-  *)
-    echo "Invalid selection. Enter 1 or 2." >&2
-    exit 1
-    ;;
+Commands:
+  menu           Interactive menu (default)
+  setup          Rename .env.example -> .env if needed, install, typecheck, build
+  install        Rename .env.example -> .env if needed, then install dependencies
+  typecheck      Run TypeScript checks
+  build          Build the production bundle
+  dev            Start Vite dev server on ${HOST}:${DEV_PORT}
+  preview        Serve the dist directory on ${HOST}:${PREVIEW_PORT}
+  stable         Serve the dist directory on ${HOST}:${STABLE_PORT}
+  clean          Remove node_modules and force a fresh install
+  doctor         Show local environment status
+  help           Show this help text
+
+Environment overrides:
+  HOST=0.0.0.0
+  DEV_PORT=3000
+  PREVIEW_PORT=1500
+  STABLE_PORT=9000
+EOF
+}
+
+menu() {
+  echo
+  echo "1) Full Setup (install + typecheck + build)"
+  echo "2) Install Dependencies"
+  echo "3) Typecheck"
+  echo "4) Build"
+  echo "5) Dev Mode"
+  echo "6) Production Preview"
+  echo "7) Stable Serve"
+  echo "8) Clean Reinstall"
+  echo "9) Doctor"
+  echo "10) Help"
+  echo
+  read -rp "Choose an option [1-10]: " selection
+
+  case "$selection" in
+    1) full_setup ;;
+    2) install_dependencies ;;
+    3) typecheck_app ;;
+    4) build_app ;;
+    5) start_dev ;;
+    6) serve_dist "preview" "$PREVIEW_PORT" ;;
+    7) serve_dist "stable" "$STABLE_PORT" ;;
+    8) clean_install ;;
+    9) doctor ;;
+    10) show_help ;;
+    *) fail "invalid selection '$selection'" ;;
+  esac
+}
+
+case "$ACTION" in
+  menu) menu ;;
+  setup) full_setup ;;
+  install) install_dependencies ;;
+  typecheck) typecheck_app ;;
+  build) build_app ;;
+  dev) start_dev ;;
+  preview) serve_dist "preview" "$PREVIEW_PORT" ;;
+  stable) serve_dist "stable" "$STABLE_PORT" ;;
+  clean) clean_install ;;
+  doctor) doctor ;;
+  help|-h|--help) show_help ;;
+  *) fail "unknown command '$ACTION'. Run './manage.sh help' for usage." ;;
 esac
