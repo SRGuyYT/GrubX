@@ -1,9 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const readEnv = (value: string | undefined, fallback: string) => (value && value.trim().length > 0 ? value : fallback);
+const readBooleanEnv = (value: string | undefined) => value === "true";
+let authEmulatorConnected = false;
 
 const firebaseConfig = {
   apiKey: readEnv(import.meta.env.VITE_FIREBASE_API_KEY, "AIzaSyBtbU7NxYqX3W95NxFtzLAwV_IecVsXAk0"),
@@ -18,6 +20,16 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const isUsingAuthEmulator = readBooleanEnv(import.meta.env.VITE_USE_FIREBASE_AUTH_EMULATOR);
+
+if (typeof window !== "undefined" && isUsingAuthEmulator) {
+  const authEmulatorUrl = readEnv(import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL, "http://127.0.0.1:9099");
+
+  if (!authEmulatorConnected) {
+    connectAuthEmulator(auth, authEmulatorUrl, { disableWarnings: true });
+    authEmulatorConnected = true;
+  }
+}
 
 export let analytics: Analytics | null = null;
 
