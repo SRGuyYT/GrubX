@@ -9,6 +9,9 @@ HOST="${HOST:-0.0.0.0}"
 DEV_PORT="${DEV_PORT:-3000}"
 PREVIEW_PORT="${PREVIEW_PORT:-1500}"
 STABLE_PORT="${STABLE_PORT:-9000}"
+DEV_DOMAIN="${DEV_DOMAIN:-grub.dev.sky0cloud.dpdns.org}"
+PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-grub.preview.sky0cloud.dpdns.org}"
+STABLE_DOMAIN="${STABLE_DOMAIN:-grub.sky0cloud.dpdns.org}"
 ACTION="${1:-menu}"
 
 log() {
@@ -38,6 +41,15 @@ ensure_pnpm() {
 
 run_pnpm() {
   "${PNPM_CMD[@]}" "$@"
+}
+
+mode_domain() {
+  case "$1" in
+    dev) printf '%s' "$DEV_DOMAIN" ;;
+    preview) printf '%s' "$PREVIEW_DOMAIN" ;;
+    stable) printf '%s' "$STABLE_DOMAIN" ;;
+    *) printf '%s' "$HOST" ;;
+  esac
 }
 
 ensure_env_file() {
@@ -93,6 +105,8 @@ clean_install() {
 serve_dist() {
   local mode="$1"
   local port="$2"
+  local domain
+  domain="$(mode_domain "$mode")"
 
   ensure_pnpm
   ensure_env_file
@@ -103,16 +117,16 @@ serve_dist() {
   fi
 
   if command -v serve >/dev/null 2>&1; then
-    log "Serving 'dist' in ${mode} mode with global serve on ${HOST}:${port}..."
+    log "Serving 'dist' in ${mode} mode on ${HOST}:${port} (${domain}) with global serve..."
     exec serve -s dist -l "tcp://${HOST}:${port}"
   fi
 
   if run_pnpm exec serve --version >/dev/null 2>&1; then
-    log "Serving 'dist' in ${mode} mode with local serve on ${HOST}:${port}..."
+    log "Serving 'dist' in ${mode} mode on ${HOST}:${port} (${domain}) with local serve..."
     exec "${PNPM_CMD[@]}" exec serve -s dist -l "tcp://${HOST}:${port}"
   fi
 
-  log "No static server was found. Falling back to 'pnpm dlx serve' in ${mode} mode on ${HOST}:${port}..."
+  log "No static server was found. Falling back to 'pnpm dlx serve' in ${mode} mode on ${HOST}:${port} (${domain})..."
   exec "${PNPM_CMD[@]}" dlx serve -s dist -l "tcp://${HOST}:${port}"
 }
 
@@ -125,7 +139,7 @@ start_dev() {
     install_dependencies
   fi
 
-  log "Starting Vite dev server on ${HOST}:${DEV_PORT}..."
+  log "Starting Vite dev server on ${HOST}:${DEV_PORT} (${DEV_DOMAIN})..."
   exec "${PNPM_CMD[@]}" dev --host "${HOST}" --port "${DEV_PORT}"
 }
 
@@ -135,8 +149,11 @@ doctor() {
   printf '  root: %s\n' "$ROOT_DIR"
   printf '  host: %s\n' "$HOST"
   printf '  dev_port: %s\n' "$DEV_PORT"
+  printf '  dev_domain: %s\n' "$DEV_DOMAIN"
   printf '  preview_port: %s\n' "$PREVIEW_PORT"
+  printf '  preview_domain: %s\n' "$PREVIEW_DOMAIN"
   printf '  stable_port: %s\n' "$STABLE_PORT"
+  printf '  stable_domain: %s\n' "$STABLE_DOMAIN"
   printf '  node: %s\n' "$(node --version 2>/dev/null || echo 'missing')"
   printf '  pnpm: %s\n' "$(run_pnpm --version 2>/dev/null || echo 'unavailable')"
   printf '  env_file: %s\n' "$(
@@ -172,8 +189,11 @@ Commands:
 Environment overrides:
   HOST=0.0.0.0
   DEV_PORT=3000
+  DEV_DOMAIN=${DEV_DOMAIN}
   PREVIEW_PORT=1500
+  PREVIEW_DOMAIN=${PREVIEW_DOMAIN}
   STABLE_PORT=9000
+  STABLE_DOMAIN=${STABLE_DOMAIN}
 EOF
 }
 
