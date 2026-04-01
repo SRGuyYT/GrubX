@@ -115,7 +115,7 @@ importers:
         specifier: latest
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
-        specifier: latest
+        specifier: 6.0.1
         version: 6.0.1(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(jiti@2.6.1))
       class-variance-authority:
         specifier: latest
@@ -184,7 +184,7 @@ importers:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       vite:
-        specifier: latest
+        specifier: 8.0.3
         version: 8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(jiti@2.6.1)
       wouter:
         specifier: ^3.3.5
