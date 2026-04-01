@@ -1,6 +1,6 @@
 # 🎬 GrubX
 
-A modern full-stack web app for discovering and watching movies and TV shows. Built with a focus on performance, clean UI, and a personalized user experience.
+A modern full-stack web app for discovering and exploring movies and TV shows. Built with a focus on performance, clean UI, and a personalized user experience.
 
 ---
 
@@ -84,13 +84,13 @@ Core features are functional, but the app is still under active development.
 
 ## 🔌 API & Server
 
-This app uses **Next.js server routes** for backend functionality:
+This app uses **Next.js server routes** for backend functionality.
 
 ### Auth API
 
 * `app/api/auth/matrix/bridge/route.ts`
 
-  * Handles authentication via Matrix bridge
+  * Handles authentication via the Matrix bridge
   * Connects external auth flow to Firebase sessions
 
 ### Server Utilities
@@ -159,6 +159,13 @@ https://github.com/SRGuyYT/grubX/commits/
 ## 📄 License
 
 MIT License
+
+---
+
+## ⚖️ Legal
+
+See full legal and policy details here:
+https://github.com/SRGuyYT/GrubX/blob/main/LEGAL.md
 
 ---
 
