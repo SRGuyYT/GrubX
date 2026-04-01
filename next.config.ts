@@ -12,8 +12,7 @@ const nextConfig: NextConfig = {
   },
   allowedDevOrigins: [
     'responsive-vidking.cluster-0.preview.emergentcf.cloud',
-    'responsive-vidking.cluster-8.preview.emergentcf.cloud',
-    /\.preview\.emergentcf\.cloud$/ as any
+    'responsive-vidking.cluster-8.preview.emergentcf.cloud'
   ]
 };
 

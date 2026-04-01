@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useSettingsContext } from "@/context/SettingsContext";
@@ -12,7 +12,10 @@ export const useWatchlistSubscription = () => {
   const queryClient = useQueryClient();
   const { ready, mode, scope } = useSettingsContext();
   const [isBootstrapping, setIsBootstrapping] = useState(true);
-  const queryKey = queryKeys.watchlist(mode, scope.mode === "account" ? scope.uid : null);
+  const queryKey = useMemo(
+    () => queryKeys.watchlist(mode, scope.mode === "account" ? scope.uid : null),
+    [mode, scope]
+  );
 
   useEffect(() => {
     if (!ready) {
