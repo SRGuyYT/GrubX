@@ -2,7 +2,7 @@ import type { AppDataMode, Settings } from "@/types/settings";
 
 export const DEFAULT_SETTINGS: Settings = {
   guestMode: true,
-  allowPopups: false,
+  blockPopups: false,
   autoplayTrailers: false,
   enableAnimations: true,
   dataSaver: false,
@@ -16,7 +16,7 @@ export const PREFERRED_MODE_KEY = "grubx_mode";
 
 export const sanitizeSettings = (input?: Partial<Settings> | null): Settings => ({
   guestMode: input?.guestMode ?? DEFAULT_SETTINGS.guestMode,
-  allowPopups: false,
+  blockPopups: input?.blockPopups ?? DEFAULT_SETTINGS.blockPopups,
   autoplayTrailers: input?.autoplayTrailers ?? DEFAULT_SETTINGS.autoplayTrailers,
   enableAnimations: input?.enableAnimations ?? DEFAULT_SETTINGS.enableAnimations,
   dataSaver: input?.dataSaver ?? DEFAULT_SETTINGS.dataSaver,

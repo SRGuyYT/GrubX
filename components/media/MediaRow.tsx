@@ -47,7 +47,9 @@ export function MediaRow({
 
       <div ref={rowRef} className="scrollbar-hidden flex gap-4 overflow-x-auto pb-2">
         {items.map((item) => (
-          <MovieCard key={`${item.mediaType}-${item.id}`} media={item} />
+          <div key={`${item.mediaType}-${item.id}`} className="shrink-0 w-[160px] sm:w-[200px] md:w-[220px]">
+            <MovieCard media={item} />
+          </div>
         ))}
       </div>
     </section>

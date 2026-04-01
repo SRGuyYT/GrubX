@@ -35,7 +35,7 @@ export function PlaybackTheater({
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const lastProgressRef = useRef(0);
 
-  const { ready, scope } = useSettingsContext();
+  const { ready, scope, settings } = useSettingsContext();
 
   const detailsQuery = useQuery({
     queryKey: ["player", mediaType, mediaId, "details"],
@@ -52,8 +52,27 @@ export function PlaybackTheater({
     staleTime: 1000 * 60 * 10,
   });
 
+  const progressQuery = useQuery({
+    queryKey: ["player", mediaId, "progress", scope],
+    queryFn: () => dataLayer.getPlaybackProgress(scope, mediaId),
+    enabled: open && ready,
+  });
+
+  const hasLoadedProgressRef = useRef(false);
+
+  useEffect(() => {
+    if (open && mediaType === "tv" && progressQuery.data && !hasLoadedProgressRef.current) {
+      if (progressQuery.data.season && progressQuery.data.episode) {
+        setSelectedSeason(progressQuery.data.season);
+        setSelectedEpisode(progressQuery.data.episode);
+      }
+      hasLoadedProgressRef.current = true;
+    }
+  }, [open, mediaType, progressQuery.data]);
+
   useEffect(() => {
     if (!open) {
+      hasLoadedProgressRef.current = false;
       return;
     }
 
@@ -128,10 +147,21 @@ export function PlaybackTheater({
     return null;
   }
 
-  const sourceUrl =
+  let sourceUrl =
     mediaType === "movie"
       ? `${env.vidkingBase}/movie/${mediaId}?color=ff5a2a&autoPlay=true`
-      : `${env.vidkingBase}/tv/${mediaId}/${selectedSeason}/${selectedEpisode}?color=ff5a2a&autoPlay=true&episodeSelector=true`;
+      : `${env.vidkingBase}/tv/${mediaId}/${selectedSeason}/${selectedEpisode}?color=ff5a2a&autoPlay=true&nextEpisode=true&episodeSelector=true`;
+
+  if (progressQuery.data && progressQuery.data.currentTime > 0) {
+    if (
+      mediaType === "movie" ||
+      (mediaType === "tv" &&
+        progressQuery.data.season === selectedSeason &&
+        progressQuery.data.episode === selectedEpisode)
+    ) {
+      sourceUrl += `&progress=${Math.floor(progressQuery.data.currentTime)}`;
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-[85] flex items-center justify-center bg-black/88 px-4 py-4 backdrop-blur-md">
@@ -208,6 +238,11 @@ export function PlaybackTheater({
             title={`${title} player`}
             className="h-full w-full border-0"
             allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            sandbox={
+              settings.blockPopups
+                ? "allow-scripts allow-same-origin allow-forms allow-presentation"
+                : undefined
+            }
           />
 
           {detailsQuery.isError ? (

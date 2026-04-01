@@ -47,7 +47,7 @@ const writeLocalJson = <T>(key: string, value: T) => {
 
 const normalizeSettings = (input?: Partial<Settings>): Settings => ({
   guestMode: input?.guestMode ?? DEFAULT_SETTINGS.guestMode,
-  allowPopups: false,
+  blockPopups: input?.blockPopups ?? DEFAULT_SETTINGS.blockPopups,
   autoplayTrailers: input?.autoplayTrailers ?? DEFAULT_SETTINGS.autoplayTrailers,
   enableAnimations: input?.enableAnimations ?? DEFAULT_SETTINGS.enableAnimations,
   dataSaver: input?.dataSaver ?? DEFAULT_SETTINGS.dataSaver,

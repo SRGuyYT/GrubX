@@ -124,11 +124,16 @@ export function SettingsPanel() {
           />
 
           <SettingRow
-            title="Allow Popups"
-            description="Locked off by policy. GrubX only opens trailers and playback when you explicitly click."
-            checked={false}
-            disabled
-            onChange={() => undefined}
+            title="Block Popups"
+            description="When enabled, blocks popups and redirects within the embedded movie stream."
+            checked={settings.blockPopups}
+            disabled={isPending}
+            onChange={(checked) =>
+              startTransition(async () => {
+                await updateSettings({ blockPopups: checked });
+                toast.success("Popup setting updated.");
+              })
+            }
           />
         </div>
       </div>

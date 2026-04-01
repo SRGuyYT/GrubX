@@ -55,8 +55,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         const loadedSettings = await dataLayer.loadSettings(nextScope);
         const resolvedSettings =
           nextMode === "guest"
-            ? { ...loadedSettings, guestMode: true, allowPopups: false as const }
-            : { ...loadedSettings, guestMode: false, allowPopups: false as const };
+            ? { ...loadedSettings, guestMode: true }
+            : { ...loadedSettings, guestMode: false };
 
         if (cancelled) {
           return;
@@ -73,8 +73,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setMode(nextMode);
         setSettings(
           nextMode === "guest"
-            ? { ...DEFAULT_SETTINGS, guestMode: true, allowPopups: false as const }
-            : { ...DEFAULT_SETTINGS, guestMode: false, allowPopups: false as const },
+            ? { ...DEFAULT_SETTINGS, guestMode: true }
+            : { ...DEFAULT_SETTINGS, guestMode: false },
         );
         setError(caughtError instanceof Error ? caughtError.message : "Settings could not be loaded.");
       }
@@ -100,14 +100,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       async updateSettings(next) {
         const merged =
           mode === "guest"
-            ? { ...settings, ...next, guestMode: true, allowPopups: false as const }
-            : { ...settings, ...next, guestMode: false, allowPopups: false as const };
+            ? { ...settings, ...next, guestMode: true }
+            : { ...settings, ...next, guestMode: false };
         try {
           const persisted = await dataLayer.saveSettings(scope, merged);
           setSettings(
             mode === "guest"
-              ? { ...persisted, guestMode: true, allowPopups: false as const }
-              : { ...persisted, guestMode: false, allowPopups: false as const },
+              ? { ...persisted, guestMode: true }
+              : { ...persisted, guestMode: false },
           );
           setError(null);
         } catch (caughtError) {
@@ -130,16 +130,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           setMode(nextMode);
           setSettings(
             nextMode === "guest"
-              ? { ...loadedSettings, guestMode: true, allowPopups: false as const }
-              : { ...loadedSettings, guestMode: false, allowPopups: false as const },
+              ? { ...loadedSettings, guestMode: true }
+              : { ...loadedSettings, guestMode: false },
           );
           setError(null);
         } catch (caughtError) {
           setMode(nextMode);
           setSettings(
             nextMode === "guest"
-              ? { ...DEFAULT_SETTINGS, guestMode: true, allowPopups: false as const }
-              : { ...DEFAULT_SETTINGS, guestMode: false, allowPopups: false as const },
+              ? { ...DEFAULT_SETTINGS, guestMode: true }
+              : { ...DEFAULT_SETTINGS, guestMode: false },
           );
           setError(caughtError instanceof Error ? caughtError.message : "Mode settings could not be loaded.");
         } finally {

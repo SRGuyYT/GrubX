@@ -24,9 +24,9 @@ export function MovieCard({
 
   return (
     <>
-      <article className="group relative min-w-[220px] max-w-[220px]">
-        <div className="liquid-glass-soft overflow-hidden rounded-[1.6rem]">
-          <Link href={`/title/${media.mediaType}/${media.id}`} className="relative block aspect-[2/3] overflow-hidden">
+      <article className="group relative flex h-full w-full flex-col">
+        <div className="liquid-glass-soft flex h-full flex-col overflow-hidden rounded-[1.6rem]">
+          <Link href={`/title/${media.mediaType}/${media.id}`} className="relative block aspect-[2/3] w-full overflow-hidden">
             <Image
               src={
                 media.posterPath
@@ -59,26 +59,22 @@ export function MovieCard({
             </div>
           </Link>
 
-          <div className="flex items-center gap-2 p-3">
+          <div className="mt-auto flex flex-col gap-2 p-3 sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={() => setPlayerOpen(true)}
-              className="flex-1 rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-black transition hover:brightness-110 sm:text-sm"
             >
-              <span className="inline-flex items-center gap-2">
-                <Play className="size-4 fill-current" />
-                Quick Play
-              </span>
+              <Play className="size-4 fill-current shrink-0" />
+              <span className="truncate">Quick Play</span>
             </button>
             <button
               type="button"
               onClick={() => setTrailerOpen(true)}
-              className="rounded-full border border-white/10 px-4 py-2 text-sm text-[var(--muted)] transition hover:text-white"
+              className="flex items-center justify-center gap-2 rounded-full border border-white/10 px-3 py-2 text-xs text-[var(--muted)] transition hover:text-white sm:w-auto sm:text-sm"
             >
-              <span className="inline-flex items-center gap-2">
-                <Ticket className="size-4" />
-                Trailer
-              </span>
+              <Ticket className="size-4 shrink-0" />
+              <span className="truncate">Trailer</span>
             </button>
           </div>
         </div>

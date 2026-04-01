@@ -2,7 +2,7 @@ export type AppDataMode = "guest" | "account";
 
 export type Settings = {
   guestMode: boolean;
-  allowPopups: false;
+  blockPopups: boolean;
   autoplayTrailers: boolean;
   enableAnimations: boolean;
   dataSaver: boolean;
