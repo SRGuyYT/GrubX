@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/movies", label: "Movies" },
   { href: "/tv", label: "TV" },
+  { href: "/live", label: "Live TV" },
   { href: "/search", label: "Search" },
   { href: "/settings", label: "Settings" },
 ];
@@ -21,7 +22,7 @@ export function Navbar() {
   const { initialized, session, user, logout } = useSession();
 
   return (
-    <div className="sticky top-4 z-50 mx-auto w-full max-w-[1440px] px-4 md:px-6 pointer-events-none transition-all">
+    <div className="fixed top-4 left-0 right-0 z-[100] mx-auto w-full max-w-[1440px] px-4 md:px-6 pointer-events-none transition-all">
       <header className="pointer-events-auto relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d1117]/85 shadow-[0_18px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl">
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-3">

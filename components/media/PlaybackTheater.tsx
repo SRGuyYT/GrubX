@@ -172,14 +172,14 @@ export function PlaybackTheater({
 
       <div
         className={cn(
-          "relative z-[86] overflow-hidden bg-black transition-all duration-300",
+          "relative z-[86] flex overflow-hidden bg-black transition-all duration-300",
           isTheaterMode
             ? "h-full w-full rounded-none"
-            : "liquid-glass h-[min(88vh,880px)] w-full max-w-6xl rounded-[2rem] p-4",
+            : "liquid-glass h-[min(88vh,880px)] w-full max-w-6xl flex-col rounded-[2rem] p-4"
         )}
       >
-        <div className="relative flex h-full flex-col overflow-hidden rounded-[1.4rem] border border-white/10 bg-black">
-          <div className="absolute inset-x-0 top-0 z-10 flex flex-wrap items-center justify-between gap-4 bg-gradient-to-b from-black/90 to-transparent px-5 py-4">
+        <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.4rem] border border-white/10 bg-black">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-[#0d1117]/90 px-5 py-4">
             <div>
               <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted)]">
                 {mediaType === "tv" ? `Season ${selectedSeason} Episode ${selectedEpisode}` : "Movie Playback"}
@@ -234,17 +234,19 @@ export function PlaybackTheater({
             </div>
           </div>
 
-          <iframe
-            src={sourceUrl}
-            title={`${title} player`}
-            className="h-full w-full border-0"
-            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-            sandbox={
-              settings.blockPopups
-                ? "allow-scripts allow-same-origin allow-forms allow-presentation"
-                : undefined
-            }
-          />
+          <div className="relative flex-1 bg-black">
+            <iframe
+              src={sourceUrl}
+              title={`${title} player`}
+              className="absolute inset-0 h-full w-full border-0"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              sandbox={
+                settings.blockPopups
+                  ? "allow-scripts allow-same-origin allow-forms allow-presentation"
+                  : undefined
+              }
+            />
+          </div>
 
           {detailsQuery.isError ? (
             <div className="absolute bottom-4 left-4 right-4 z-10 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
