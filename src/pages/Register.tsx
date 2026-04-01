@@ -20,7 +20,7 @@ export default function Register() {
     setErrorMsg("");
     setLoadingMode("password");
     try {
-      await register(email, username, password);
+      await register(email.trim(), username.trim(), password);
       setLocation("/");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";
@@ -30,6 +30,12 @@ export default function Register() {
         setErrorMsg("GX-AUTH-011: Password must be at least 6 characters.");
       } else if (code === "auth/invalid-email") {
         setErrorMsg("GX-AUTH-012: Please enter a valid email address.");
+      } else if (code === "auth/operation-not-allowed") {
+        setErrorMsg("GX-AUTH-014: Email/password registration is not enabled in Firebase Authentication.");
+      } else if (code === "auth/invalid-api-key" || code === "auth/app-not-authorized") {
+        setErrorMsg("GX-AUTH-015: Firebase Authentication is misconfigured for this environment.");
+      } else if (code === "auth/network-request-failed") {
+        setErrorMsg("GX-AUTH-016: Network error while contacting Firebase. Check connectivity and authorized domains.");
       } else {
         setErrorMsg("GX-AUTH-013: Registration failed. Please try again.");
       }
@@ -48,6 +54,10 @@ export default function Register() {
       const code = (err as { code?: string })?.code ?? "";
       if (code === "auth/account-exists-with-different-credential") {
         setErrorMsg("GX-AUTH-020: This email is already linked to another sign-in method.");
+      } else if (code === "auth/unauthorized-domain") {
+        setErrorMsg("GX-AUTH-025: This domain is not authorized in Firebase Authentication.");
+      } else if (code === "auth/operation-not-allowed") {
+        setErrorMsg("GX-AUTH-026: GitHub sign-in is not enabled in Firebase Authentication.");
       } else if (code === "auth/popup-blocked") {
         setErrorMsg("GX-AUTH-021: Allow popups in your browser to continue with GitHub.");
       } else if (code === "auth/popup-closed-by-user") {
@@ -108,6 +118,7 @@ export default function Register() {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
               className="h-14 bg-white/5 border-white/10 text-white text-base rounded-lg focus-visible:ring-primary focus-visible:border-primary placeholder:text-white/40"
               required
             />
@@ -116,6 +127,7 @@ export default function Register() {
               placeholder="Email Address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="h-14 bg-white/5 border-white/10 text-white text-base rounded-lg focus-visible:ring-primary focus-visible:border-primary placeholder:text-white/40"
               required
             />
@@ -124,6 +136,7 @@ export default function Register() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               className="h-14 bg-white/5 border-white/10 text-white text-base rounded-lg focus-visible:ring-primary focus-visible:border-primary placeholder:text-white/40"
               required
               minLength={6}

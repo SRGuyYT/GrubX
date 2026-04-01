@@ -19,12 +19,18 @@ export default function Login() {
     setErrorMsg("");
     setLoadingMode("password");
     try {
-      await login(email, password);
+      await login(email.trim(), password);
       setLocation("/");
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code ?? "";
       if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
         setErrorMsg("GX-AUTH-001: Invalid email or password.");
+      } else if (code === "auth/operation-not-allowed") {
+        setErrorMsg("GX-AUTH-004: Email/password sign-in is not enabled in Firebase Authentication.");
+      } else if (code === "auth/invalid-api-key" || code === "auth/app-not-authorized") {
+        setErrorMsg("GX-AUTH-005: Firebase Authentication is misconfigured for this environment.");
+      } else if (code === "auth/network-request-failed") {
+        setErrorMsg("GX-AUTH-006: Network error while contacting Firebase. Check connectivity and authorized domains.");
       } else if (code === "auth/too-many-requests") {
         setErrorMsg("GX-AUTH-003: Too many attempts. Please try again later.");
       } else {
@@ -45,6 +51,10 @@ export default function Login() {
       const code = (err as { code?: string })?.code ?? "";
       if (code === "auth/account-exists-with-different-credential") {
         setErrorMsg("GX-AUTH-020: This email is already linked to another sign-in method.");
+      } else if (code === "auth/unauthorized-domain") {
+        setErrorMsg("GX-AUTH-025: This domain is not authorized in Firebase Authentication.");
+      } else if (code === "auth/operation-not-allowed") {
+        setErrorMsg("GX-AUTH-026: GitHub sign-in is not enabled in Firebase Authentication.");
       } else if (code === "auth/popup-blocked") {
         setErrorMsg("GX-AUTH-021: Allow popups in your browser to sign in with GitHub.");
       } else if (code === "auth/popup-closed-by-user") {
@@ -105,6 +115,7 @@ export default function Login() {
               placeholder="Email Address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="h-14 bg-white/5 border-white/10 text-white text-base rounded-lg focus-visible:ring-primary focus-visible:border-primary placeholder:text-white/40"
               required
             />
@@ -113,6 +124,7 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
               className="h-14 bg-white/5 border-white/10 text-white text-base rounded-lg focus-visible:ring-primary focus-visible:border-primary placeholder:text-white/40"
               required
             />

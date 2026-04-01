@@ -261,7 +261,6 @@ export function TheaterMode({
             <iframe
               src={getEmbedUrl()}
               className={`h-full w-full border-none transition-opacity duration-1000 ${iframeLoaded ? "opacity-100" : "opacity-0"}`}
-              allowFullScreen
               allow="autoplay; fullscreen"
               onLoad={() => setIframeLoaded(true)}
               onError={() =>
