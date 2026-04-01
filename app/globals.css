@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@import "../styles/liquid-glass.css";
+
+:root {
+  color-scheme: dark;
+  --background: #05070b;
+  --foreground: #eef2ff;
+  --muted: #95a2c6;
+  --surface: #0d1525;
+  --surface-strong: #11192a;
+  --surface-alt: #0a1020;
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: #ff5a2a;
+  --accent-soft: rgba(255, 90, 42, 0.22);
+  --success: #6cf2c8;
+}
+
+html[data-theme="cinematic-dark"] {
+  background:
+    radial-gradient(circle at top left, rgba(255, 90, 42, 0.18), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(108, 242, 200, 0.12), transparent 25%),
+    linear-gradient(180deg, #05070b 0%, #0b111c 45%, #05070b 100%);
+}
+
+html,
+body {
+  min-height: 100%;
+  background: transparent;
+  color: var(--foreground);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-space-grotesk), sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-fraunces), serif;
+}
+
+code,
+pre {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(255, 90, 42, 0.28);
+  color: #fff2eb;
+}
+
+.page-shell {
+  margin: 0 auto;
+  width: min(100%, 1440px);
+  padding: 0 1.25rem;
+}
+
+.grain {
+  position: relative;
+}
+
+.grain::before {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 160px 160px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 80%);
+  opacity: 0.24;
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

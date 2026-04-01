@@ -15,11 +15,11 @@ STABLE_DOMAIN="${STABLE_DOMAIN:-grub.sky0cloud.dpdns.org}"
 ACTION="${1:-menu}"
 
 log() {
-  printf '[grubedx] %s\n' "$*"
+  printf '[grubx] %s\n' "$*"
 }
 
 fail() {
-  printf '[grubedx] Error: %s\n' "$*" >&2
+  printf '[grubx] Error: %s\n' "$*" >&2
   exit 1
 }
 
@@ -41,15 +41,6 @@ ensure_pnpm() {
 
 run_pnpm() {
   "${PNPM_CMD[@]}" "$@"
-}
-
-mode_domain() {
-  case "$1" in
-    dev) printf '%s' "$DEV_DOMAIN" ;;
-    preview) printf '%s' "$PREVIEW_DOMAIN" ;;
-    stable) printf '%s' "$STABLE_DOMAIN" ;;
-    *) printf '%s' "$HOST" ;;
-  esac
 }
 
 ensure_env_file() {
@@ -83,7 +74,7 @@ typecheck_app() {
 build_app() {
   ensure_pnpm
   ensure_env_file
-  log "Building production bundle..."
+  log "Building Next.js production bundle..."
   run_pnpm build
 }
 
@@ -96,38 +87,19 @@ full_setup() {
 clean_install() {
   ensure_pnpm
   ensure_env_file
-  log "Removing node_modules and lockfile-pinned install state..."
-  rm -rf node_modules
+  log "Removing node_modules and Next build output..."
+  rm -rf node_modules .next
   log "Reinstalling dependencies from scratch..."
   run_pnpm install --force
 }
 
-serve_dist() {
-  local mode="$1"
-  local port="$2"
-  local domain
-  domain="$(mode_domain "$mode")"
-
-  ensure_pnpm
-  ensure_env_file
-
-  if [[ ! -d dist ]]; then
-    log "'dist' was not found. Building before ${mode} serve..."
-    build_app
+ensure_build_output() {
+  if [[ -d .next ]]; then
+    return
   fi
 
-  if command -v serve >/dev/null 2>&1; then
-    log "Serving 'dist' in ${mode} mode on ${HOST}:${port} (${domain}) with global serve..."
-    exec serve -s dist -l "tcp://${HOST}:${port}"
-  fi
-
-  if run_pnpm exec serve --version >/dev/null 2>&1; then
-    log "Serving 'dist' in ${mode} mode on ${HOST}:${port} (${domain}) with local serve..."
-    exec "${PNPM_CMD[@]}" exec serve -s dist -l "tcp://${HOST}:${port}"
-  fi
-
-  log "No static server was found. Falling back to 'pnpm dlx serve' in ${mode} mode on ${HOST}:${port} (${domain})..."
-  exec "${PNPM_CMD[@]}" dlx serve -s dist -l "tcp://${HOST}:${port}"
+  log "'.next' was not found. Building before start..."
+  build_app
 }
 
 start_dev() {
@@ -139,8 +111,21 @@ start_dev() {
     install_dependencies
   fi
 
-  log "Starting Vite dev server on ${HOST}:${DEV_PORT} (${DEV_DOMAIN})..."
-  exec "${PNPM_CMD[@]}" dev --host "${HOST}" --port "${DEV_PORT}"
+  log "Starting Next.js dev server on ${HOST}:${DEV_PORT} (${DEV_DOMAIN})..."
+  exec "${PNPM_CMD[@]}" exec next dev -H "${HOST}" -p "${DEV_PORT}"
+}
+
+start_server() {
+  local mode="$1"
+  local port="$2"
+  local domain="$3"
+
+  ensure_pnpm
+  ensure_env_file
+  ensure_build_output
+
+  log "Starting Next.js ${mode} server on ${HOST}:${port} (${domain})..."
+  exec "${PNPM_CMD[@]}" exec next start -H "${HOST}" -p "${port}"
 }
 
 doctor() {
@@ -165,7 +150,7 @@ doctor() {
       echo "missing"
     fi
   )"
-  printf '  dist: %s\n' "$([[ -d dist ]] && echo present || echo missing)"
+  printf '  next_build: %s\n' "$([[ -d .next ]] && echo present || echo missing)"
   printf '  node_modules: %s\n' "$([[ -d node_modules ]] && echo present || echo missing)"
 }
 
@@ -178,11 +163,11 @@ Commands:
   setup          Rename .env.example -> .env if needed, install, typecheck, build
   install        Rename .env.example -> .env if needed, then install dependencies
   typecheck      Run TypeScript checks
-  build          Build the production bundle
-  dev            Start Vite dev server on ${HOST}:${DEV_PORT}
-  preview        Serve the dist directory on ${HOST}:${PREVIEW_PORT}
-  stable         Serve the dist directory on ${HOST}:${STABLE_PORT}
-  clean          Remove node_modules and force a fresh install
+  build          Build the Next.js production bundle
+  dev            Start Next.js dev server on ${HOST}:${DEV_PORT}
+  preview        Start Next.js preview server on ${HOST}:${PREVIEW_PORT}
+  stable         Start Next.js stable server on ${HOST}:${STABLE_PORT}
+  clean          Remove node_modules/.next and force a fresh install
   doctor         Show local environment status
   help           Show this help text
 
@@ -218,8 +203,8 @@ menu() {
     3) typecheck_app ;;
     4) build_app ;;
     5) start_dev ;;
-    6) serve_dist "preview" "$PREVIEW_PORT" ;;
-    7) serve_dist "stable" "$STABLE_PORT" ;;
+    6) start_server "preview" "$PREVIEW_PORT" "$PREVIEW_DOMAIN" ;;
+    7) start_server "stable" "$STABLE_PORT" "$STABLE_DOMAIN" ;;
     8) clean_install ;;
     9) doctor ;;
     10) show_help ;;
@@ -234,8 +219,8 @@ case "$ACTION" in
   typecheck) typecheck_app ;;
   build) build_app ;;
   dev) start_dev ;;
-  preview) serve_dist "preview" "$PREVIEW_PORT" ;;
-  stable) serve_dist "stable" "$STABLE_PORT" ;;
+  preview) start_server "preview" "$PREVIEW_PORT" "$PREVIEW_DOMAIN" ;;
+  stable) start_server "stable" "$STABLE_PORT" "$STABLE_DOMAIN" ;;
   clean) clean_install ;;
   doctor) doctor ;;
   help|-h|--help) show_help ;;
