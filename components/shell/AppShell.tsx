@@ -6,9 +6,9 @@ import { Navbar } from "@/components/shell/Navbar";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="grain min-h-screen overflow-x-hidden">
+    <div className="grain min-h-screen overflow-x-hidden pb-6">
       <Navbar />
-      <div className="pt-28 md:pt-32">
+      <div className="space-y-5 pt-28 md:space-y-7 md:pt-32">
         <GuestModeBanner />
         <main>{children}</main>
       </div>

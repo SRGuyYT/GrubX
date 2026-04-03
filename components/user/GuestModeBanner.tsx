@@ -13,8 +13,8 @@ export function GuestModeBanner() {
   }
 
   return (
-    <div className="page-shell pb-4">
-      <div className="flex items-center gap-3 rounded-full border border-amber-500/30 bg-[#0d1117]/90 px-5 py-3 text-sm font-medium text-amber-200 shadow-[0_8px_32px_rgba(245,158,11,0.2)] backdrop-blur-xl">
+    <div className="page-shell pt-2 pb-1">
+      <div className="liquid-glass-soft flex items-center gap-3 rounded-[1.5rem] border-amber-500/20 px-5 py-4 text-sm font-medium text-amber-100 shadow-[0_14px_38px_rgba(245,158,11,0.14)]">
         <AlertTriangle className="size-4 shrink-0 text-amber-400" />
         <span className="flex-1">You are in Guest Mode. Your data is temporary.</span>
         <button

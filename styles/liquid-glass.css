@@ -1,16 +1,24 @@
 .liquid-glass {
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  background: rgba(0, 0, 0, 0.40);
-  border: 1px solid rgba(255, 255, 255, 0.125);
+  background:
+    linear-gradient(180deg, rgba(18, 27, 44, 0.84) 0%, rgba(8, 12, 21, 0.76) 100%),
+    radial-gradient(circle at top left, rgba(255, 106, 61, 0.12), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(101, 137, 255, 0.12), transparent 36%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 28px 80px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 .liquid-glass-soft {
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
-  background: rgba(0, 0, 0, 0.40);
+  background:
+    linear-gradient(180deg, rgba(18, 27, 44, 0.76) 0%, rgba(8, 12, 21, 0.66) 100%),
+    radial-gradient(circle at top right, rgba(101, 137, 255, 0.08), transparent 42%);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }

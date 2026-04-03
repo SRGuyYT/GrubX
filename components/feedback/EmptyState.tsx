@@ -8,10 +8,10 @@ export function EmptyState({
   description: string;
 }) {
   return (
-    <div className="liquid-glass-soft flex min-h-[220px] flex-col items-center justify-center rounded-[1.75rem] px-6 py-12 text-center">
+    <div className="liquid-glass-soft flex min-h-[240px] flex-col items-center justify-center rounded-[1.9rem] px-8 py-12 text-center">
       <FolderOpenDot className="mb-4 size-10 text-[var(--accent)]" />
       <h3 className="text-xl font-semibold">{title}</h3>
-      <p className="mt-2 max-w-md text-sm text-[var(--muted)]">{description}</p>
+      <p className="mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{description}</p>
     </div>
   );
 }

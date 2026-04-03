@@ -52,40 +52,41 @@ export function CatalogGrid({
     if (!allowSearch) {
       return description;
     }
-    return searchQuery ? `Results for “${searchQuery}”` : description;
+
+    return searchQuery ? `Results for "${searchQuery}"` : description;
   }, [allowSearch, description, searchQuery]);
 
-  const handleGenreChange = (genre: string | null) => {
+  const resetAndScroll = () => {
     setPage(1);
     setResults([]);
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  };
+
+  const handleGenreChange = (genre: string | null) => {
+    resetAndScroll();
     setSelectedGenre(genre);
   };
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setPage(1);
-    setResults([]);
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    resetAndScroll();
     setSearchQuery(searchInput.trim());
   };
 
   return (
-    <section className="page-shell py-10">
-      <div className="liquid-glass rounded-[2rem] px-6 py-8">
-        <div className="mb-8 flex flex-col gap-5">
+    <section className="page-shell py-12 md:py-16">
+      <div className="liquid-glass rounded-[2.2rem] px-6 py-8 md:px-8 md:py-10">
+        <div className="mb-10 flex flex-col gap-6">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">{mediaType}</p>
-            <h1 className="mt-3 text-4xl font-semibold">{title}</h1>
-            <p className="mt-3 max-w-3xl text-sm text-[var(--muted)]">{subtitle}</p>
+            <h1 className="mt-4 text-4xl font-semibold md:text-5xl">{title}</h1>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--muted)]">{subtitle}</p>
           </div>
 
           {allowSearch ? (
-            <form onSubmit={submitSearch} className="liquid-glass-soft flex items-center gap-3 rounded-full px-4 py-3">
+            <form onSubmit={submitSearch} className="liquid-glass-soft flex items-center gap-3 rounded-full px-5 py-3.5">
               <Search className="size-4 text-[var(--muted)]" />
               <input
                 value={searchInput}
@@ -95,7 +96,7 @@ export function CatalogGrid({
               />
               <button
                 type="submit"
-                className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110"
+                className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-black transition hover:brightness-110"
               >
                 Search
               </button>
@@ -120,20 +121,20 @@ export function CatalogGrid({
           <EmptyState title="No titles found" description="Try another genre or search phrase." />
         ) : (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-7">
               {results.map((item) => (
                 <MovieCard key={`${item.mediaType}-${item.id}`} media={item} />
               ))}
             </div>
 
-            <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="mt-10 flex flex-col items-center gap-3">
               <div ref={mediaQuery.loadMoreRef} className="h-1 w-full" />
               {mediaQuery.isFetchingNextPage ? (
-                <p className="text-sm text-[var(--muted)]">Loading page {page + 1}…</p>
+                <p className="text-sm text-[var(--muted)]">Loading page {page + 1}...</p>
               ) : mediaQuery.hasNextPage ? (
                 <p className="text-sm text-[var(--muted)]">Scroll to load more.</p>
               ) : (
-                <p className="text-sm text-[var(--muted)]">You’ve reached the end of this list.</p>
+                <p className="text-sm text-[var(--muted)]">You've reached the end of this list.</p>
               )}
             </div>
           </>

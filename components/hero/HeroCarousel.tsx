@@ -62,22 +62,22 @@ export function HeroCarousel({ items }: { items: MediaItem[] }) {
             </div>
           ))}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070bf2] to-[#05070b45]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-[#05070b88] to-[#05070b88]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#060912] via-[#060912f0] to-[#06091255]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060912] via-[#06091288] to-[#06091299]" />
 
-        <div className="page-shell relative flex min-h-[60vh] items-center py-16 md:min-h-[68vh]">
-          <div className="liquid-glass relative z-10 max-w-3xl rounded-[2rem] px-6 py-7 md:px-8 md:py-9">
+        <div className="page-shell relative flex min-h-[62vh] items-center py-20 md:min-h-[70vh] md:py-24">
+          <div className="liquid-glass relative z-10 max-w-3xl rounded-[2.2rem] px-7 py-8 md:px-9 md:py-10">
             <p className="mb-4 text-xs uppercase tracking-[0.45em] text-[var(--muted)]">Trending Today</p>
             <h1 className="max-w-2xl text-4xl font-semibold leading-none sm:text-5xl md:text-6xl">
               {activeItem.title}
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--muted)] sm:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--muted)] sm:text-lg">
               {activeItem.overview}
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
                 href={`/title/${activeItem.mediaType}/${activeItem.id}`}
-                className="rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-semibold text-black transition hover:brightness-110"
+                className="rounded-full bg-[var(--accent)] px-6 py-3.5 text-sm font-semibold text-black transition hover:brightness-110"
               >
                 <span className="inline-flex items-center gap-2">
                   <Play className="size-4 fill-current" />
@@ -87,7 +87,7 @@ export function HeroCarousel({ items }: { items: MediaItem[] }) {
               <button
                 type="button"
                 onClick={() => setTrailerOpen(true)}
-                className="liquid-glass-soft rounded-full px-6 py-3 text-sm font-semibold text-white"
+                className="liquid-glass-soft rounded-full px-6 py-3.5 text-sm font-semibold text-white"
               >
                 <span className="inline-flex items-center gap-2">
                   <Ticket className="size-4" />
@@ -97,11 +97,11 @@ export function HeroCarousel({ items }: { items: MediaItem[] }) {
             </div>
           </div>
 
-          <div className="absolute bottom-8 right-5 z-10 flex items-center gap-3">
+          <div className="absolute bottom-10 right-5 z-10 flex items-center gap-3">
             <button
               type="button"
               onClick={() => setActiveIndex((current) => (current === 0 ? items.length - 1 : current - 1))}
-              className="rounded-full border border-white/10 bg-black/35 p-3 text-[var(--muted)] transition hover:text-white"
+              className="rounded-full border border-white/10 bg-black/35 p-3 text-[var(--muted)] transition hover:border-white/20 hover:text-white"
               aria-label="Previous hero slide"
             >
               <ChevronLeft className="size-5" />
@@ -113,9 +113,9 @@ export function HeroCarousel({ items }: { items: MediaItem[] }) {
                   type="button"
                   onClick={() => setActiveIndex(index)}
                   className={cn(
-                    "size-2.5 rounded-full transition",
-                    index === activeIndex ? "bg-[var(--accent)]" : "bg-white/25",
-                  )}
+                  "size-2.5 rounded-full transition",
+                  index === activeIndex ? "bg-[var(--accent)]" : "bg-white/25",
+                )}
                   aria-label={`Go to hero slide ${index + 1}`}
                 />
               ))}
@@ -123,7 +123,7 @@ export function HeroCarousel({ items }: { items: MediaItem[] }) {
             <button
               type="button"
               onClick={() => setActiveIndex((current) => (current + 1) % items.length)}
-              className="rounded-full border border-white/10 bg-black/35 p-3 text-[var(--muted)] transition hover:text-white"
+              className="rounded-full border border-white/10 bg-black/35 p-3 text-[var(--muted)] transition hover:border-white/20 hover:text-white"
               aria-label="Next hero slide"
             >
               <ChevronRight className="size-5" />

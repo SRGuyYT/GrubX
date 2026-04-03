@@ -3,21 +3,25 @@
 
 :root {
   color-scheme: dark;
-  --background: #05070b;
+  --background: #050812;
   --foreground: #eef2ff;
-  --muted: #95a2c6;
-  --surface: #0d1525;
-  --surface-strong: #11192a;
-  --surface-alt: #0a1020;
+  --muted: #9aa8ca;
+  --surface: #0f1728;
+  --surface-strong: #151f36;
+  --surface-alt: #0b1221;
   --line: rgba(255, 255, 255, 0.1);
-  --accent: #ff5a2a;
-  --accent-soft: rgba(255, 90, 42, 0.22);
+  --accent: #ff6a3d;
+  --accent-soft: rgba(255, 106, 61, 0.18);
+  --accent-alt: rgba(101, 137, 255, 0.14);
   --success: #6cf2c8;
 }
 
 html[data-theme="cinematic-dark"] {
-  background: #0d1117;
-  background-color: #0d1117;
+  background:
+    radial-gradient(circle at top left, rgba(255, 106, 61, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(101, 137, 255, 0.13), transparent 34%),
+    linear-gradient(180deg, #09101b 0%, #060912 42%, #05070d 100%);
+  background-color: #060912;
   min-height: 100vh;
 }
 
@@ -32,6 +36,12 @@ body {
   margin: 0;
   font-family: var(--font-space-grotesk), sans-serif;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 106, 61, 0.08), transparent 22%),
+    radial-gradient(circle at 85% 10%, rgba(89, 123, 255, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 26%);
 }
 
 h1,
@@ -71,8 +81,8 @@ textarea {
 
 .page-shell {
   margin: 0 auto;
-  width: min(100%, 1440px);
-  padding: 0 1.25rem;
+  width: min(100%, 1480px);
+  padding: 0 clamp(1.1rem, 2vw, 2.5rem);
 }
 
 .grain {

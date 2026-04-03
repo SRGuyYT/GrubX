@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, Search, Settings, UserRound, X } from "lucide-react";
 
 import { cn } from "@/lib/cn";
@@ -19,14 +20,16 @@ const navLinks = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const { initialized, session, user, logout } = useSession();
+  const isActiveLink = (href: string) => href === "/" ? pathname === href : pathname.startsWith(href);
 
   return (
-    <div className="pointer-events-none fixed top-4 left-0 right-0 z-50 mx-auto w-full max-w-[1440px] px-4 transition-all md:px-6">
-      <header className="pointer-events-auto relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0d1117]/85 shadow-[0_18px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-        <div className="flex items-center justify-between px-6 py-4">
+    <div className="pointer-events-none fixed top-4 left-0 right-0 z-50 mx-auto w-full max-w-[1480px] px-4 transition-all md:px-6">
+      <header className="pointer-events-auto relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(14,20,34,0.92),rgba(8,12,21,0.88))] shadow-[0_22px_48px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+        <div className="flex items-center justify-between px-5 py-4 md:px-6">
           <Link href="/" className="flex items-center gap-3">
-            <div className="relative size-10 overflow-hidden rounded-[0.8rem] border border-white/10 bg-black/40">
+            <div className="relative size-10 overflow-hidden rounded-[0.9rem] border border-white/10 bg-black/30 shadow-[0_10px_28px_rgba(0,0,0,0.3)]">
               <Image src="/64x64.png" alt="GrubX" fill sizes="40px" className="object-cover" priority />
             </div>
             <div>
@@ -40,7 +43,12 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-white/10 hover:text-white"
+                className={cn(
+                  "rounded-full px-4 py-2 text-sm font-medium transition",
+                  isActiveLink(link.href)
+                    ? "bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+                    : "text-[var(--muted)] hover:bg-white/8 hover:text-white",
+                )}
               >
                 {link.label}
               </Link>
@@ -85,7 +93,7 @@ export function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-full bg-[var(--accent)] px-5 py-2 text-sm font-semibold text-black transition hover:brightness-110"
+                  className="rounded-full bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-black transition hover:brightness-110"
                 >
                   Create account
                 </Link>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarDays, LoaderCircle, Play, Radio, Signal, Tv2, X } from "lucide-react";
+import { CalendarDays, LoaderCircle, Radio, Signal, Tv2, X } from "lucide-react";
 
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { LoadingState } from "@/components/feedback/LoadingState";
@@ -20,7 +20,7 @@ import type { LiveMatch, LiveMatchScope, LiveSource } from "@/types/live";
 
 const scopeOptions: Array<{ id: LiveMatchScope; label: string; description: string }> = [
   { id: "live", label: "Live Now", description: "Currently running streams across every sport." },
-  { id: "all-today", label: "Today", description: "Today’s schedule with playable sources when available." },
+  { id: "all-today", label: "Today", description: "Today's schedule with playable sources when available." },
 ];
 
 export default function LiveTVPage() {
@@ -110,24 +110,24 @@ export default function LiveTVPage() {
   };
 
   return (
-    <div className="pb-12">
+    <div className="pb-14">
       <section className="relative overflow-hidden border-b border-white/8">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070bf2] to-[#05070b30]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-[#05070b99] to-[#05070b80]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#060912] via-[#060912f2] to-[#06091238]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060912] via-[#06091299] to-[#06091280]" />
 
-        <div className="page-shell relative z-10 py-10 md:py-12">
-          <div className="liquid-glass rounded-[2rem] px-6 py-7 md:px-8 md:py-8">
+        <div className="page-shell relative z-10 py-12 md:py-14">
+          <div className="liquid-glass rounded-[2.2rem] px-6 py-8 md:px-8 md:py-9">
             <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">Live TV</p>
             <h1 className="mt-3 text-4xl font-semibold leading-none sm:text-5xl md:text-6xl">Matchday Control Room</h1>
-            <p className="mt-5 max-w-3xl text-base leading-7 text-[var(--muted)] sm:text-lg">
-              Browse the Streamed feed by live status or today’s schedule, filter by sport, then open a source and pick
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--muted)] sm:text-lg">
+              Browse the Streamed feed by live status or today's schedule, filter by sport, then open a source and pick
               the stream number you want to watch.
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+            <div className="mt-7 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2">
                 <Radio className="size-4 text-[var(--accent)]" />
-                {scope === "live" ? "Realtime matches" : "Today’s schedule"}
+                {scope === "live" ? "Realtime matches" : "Today's schedule"}
               </span>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2">
                 <Signal className="size-4 text-[var(--accent)]" />
@@ -142,8 +142,8 @@ export default function LiveTVPage() {
         </div>
       </section>
 
-      <section className="page-shell space-y-6 py-10">
-        <div className="liquid-glass rounded-[2rem] px-5 py-5">
+      <section className="page-shell space-y-7 py-12 md:py-14">
+        <div className="liquid-glass rounded-[2.1rem] px-5 py-5 md:px-6 md:py-6">
           <div className="flex flex-wrap gap-3">
             {scopeOptions.map((option) => (
               <button
@@ -151,10 +151,10 @@ export default function LiveTVPage() {
                 type="button"
                 onClick={() => setScope(option.id)}
                 className={cn(
-                  "rounded-full border px-4 py-2 text-sm transition",
+                  "rounded-full border px-4 py-2.5 text-sm transition",
                   scope === option.id
                     ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                    : "border-white/10 bg-white/5 text-[var(--muted)] hover:text-white",
+                    : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
                 )}
               >
                 {option.label}
@@ -164,29 +164,29 @@ export default function LiveTVPage() {
               type="button"
               onClick={() => setPopularOnly((value) => !value)}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm transition",
+                "rounded-full border px-4 py-2.5 text-sm transition",
                 popularOnly
                   ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                  : "border-white/10 bg-white/5 text-[var(--muted)] hover:text-white",
+                  : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
               )}
             >
               Popular only
             </button>
           </div>
-          <p className="mt-3 text-sm text-[var(--muted)]">
+          <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
             {scopeOptions.find((option) => option.id === scope)?.description}
           </p>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hidden">
+        <div className="flex gap-3 overflow-x-auto pb-3 pt-1 scrollbar-hidden">
           <button
             type="button"
             onClick={() => setSelectedSport("all")}
             className={cn(
-              "rounded-full border px-4 py-2 text-sm transition",
+              "rounded-full border px-4 py-2.5 text-sm transition",
               selectedSport === "all"
                 ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                : "border-white/10 bg-white/5 text-[var(--muted)] hover:text-white",
+                : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
             )}
           >
             All sports
@@ -197,10 +197,10 @@ export default function LiveTVPage() {
               type="button"
               onClick={() => setSelectedSport(sport.id)}
               className={cn(
-                "rounded-full border px-4 py-2 text-sm whitespace-nowrap transition",
+                "rounded-full border px-4 py-2.5 text-sm whitespace-nowrap transition",
                 selectedSport === sport.id
                   ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                  : "border-white/10 bg-white/5 text-[var(--muted)] hover:text-white",
+                  : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
               )}
             >
               {sport.name}
@@ -221,19 +221,19 @@ export default function LiveTVPage() {
             description="Try a different sport or switch between live and today."
           />
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 xl:gap-7">
             {filteredMatches.map((match) => {
               const homeBadge = resolveLiveBadgeUrl(match.teams?.home?.badge);
               const awayBadge = resolveLiveBadgeUrl(match.teams?.away?.badge);
 
               return (
-                <article key={match.id} className="liquid-glass-soft overflow-hidden rounded-[1.7rem] border border-white/8">
+                <article key={match.id} className="liquid-glass-soft overflow-hidden rounded-[1.85rem] border border-white/8 p-3">
                   <button
                     type="button"
                     onClick={() => setActiveMatch(match)}
                     className="group block w-full text-left"
                   >
-                    <div className="relative aspect-video overflow-hidden">
+                    <div className="relative aspect-video overflow-hidden rounded-[1.35rem] border border-white/8">
                       <Image
                         src={resolveLivePosterUrl(match)}
                         alt={match.title}
@@ -250,7 +250,8 @@ export default function LiveTVPage() {
                         <h3 className="mt-2 line-clamp-2 text-2xl font-semibold text-white">{match.title}</h3>
                       </div>
                     </div>
-                    <div className="space-y-4 px-4 py-4">
+
+                    <div className="space-y-4 px-2 pb-2 pt-5">
                       {match.teams?.home || match.teams?.away ? (
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex min-w-0 items-center gap-3">
@@ -269,12 +270,14 @@ export default function LiveTVPage() {
                         </div>
                       ) : null}
 
-                      <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted)]">
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.15rem] border border-white/8 bg-black/20 px-4 py-3 text-sm text-[var(--muted)]">
                         <span className="inline-flex items-center gap-2">
                           <CalendarDays className="size-4" />
                           {formatLiveStart(match.date)}
                         </span>
-                        <span>{match.sources.length} source{match.sources.length === 1 ? "" : "s"}</span>
+                        <span>
+                          {match.sources.length} source{match.sources.length === 1 ? "" : "s"}
+                        </span>
                       </div>
                     </div>
                   </button>
@@ -289,7 +292,7 @@ export default function LiveTVPage() {
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/88 px-4 py-4 backdrop-blur-md">
           <button type="button" className="absolute inset-0" onClick={closeOverlay} aria-label="Close live stream overlay" />
 
-          <div className="liquid-glass relative z-[91] flex h-[min(90vh,960px)] w-full max-w-7xl flex-col overflow-hidden rounded-[2rem] p-4">
+          <div className="liquid-glass relative z-[91] flex h-[min(90vh,960px)] w-full max-w-7xl flex-col overflow-hidden rounded-[2.2rem] p-4">
             <div className="flex items-center justify-between gap-4 border-b border-white/10 bg-black/35 px-5 py-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Live Stream</p>
@@ -299,7 +302,7 @@ export default function LiveTVPage() {
               <button
                 type="button"
                 onClick={closeOverlay}
-                className="rounded-full border border-white/10 bg-black/45 p-3 text-[var(--muted)] transition hover:text-white"
+                className="rounded-full border border-white/10 bg-black/45 p-3 text-[var(--muted)] transition hover:border-white/20 hover:text-white"
               >
                 <X className="size-5" />
               </button>
@@ -340,7 +343,7 @@ export default function LiveTVPage() {
                           "rounded-full border px-3 py-2 text-sm transition",
                           activeSource?.source === source.source && activeSource?.id === source.id
                             ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                            : "border-white/10 bg-white/5 text-[var(--muted)] hover:text-white",
+                            : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
                         )}
                       >
                         {source.source}
@@ -366,13 +369,15 @@ export default function LiveTVPage() {
                             "flex w-full items-center justify-between rounded-[1.2rem] border px-4 py-3 text-left text-sm transition",
                             selectedStreamNo === stream.streamNo
                               ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                              : "border-white/10 bg-white/5 text-[var(--muted)] hover:text-white",
+                              : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
                           )}
                         >
                           <span>Stream {stream.streamNo}</span>
                           <span className="inline-flex items-center gap-2">
                             {stream.language || "Default"}
-                            {stream.hd ? <span className="rounded-full bg-black/25 px-2 py-1 text-[10px] uppercase tracking-[0.2em]">HD</span> : null}
+                            {stream.hd ? (
+                              <span className="rounded-full bg-black/25 px-2 py-1 text-[10px] uppercase tracking-[0.2em]">HD</span>
+                            ) : null}
                           </span>
                         </button>
                       ))}
@@ -382,7 +387,7 @@ export default function LiveTVPage() {
                   )}
                 </div>
 
-                <div className="rounded-[1.2rem] border border-white/8 bg-black/25 px-4 py-4 text-sm text-[var(--muted)]">
+                <div className="rounded-[1.2rem] border border-white/8 bg-black/25 px-4 py-4 text-sm leading-6 text-[var(--muted)]">
                   Match cards open the player only after you click them. Embedded streams stay inside this overlay and do
                   not auto-open elsewhere.
                 </div>

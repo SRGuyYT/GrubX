@@ -23,10 +23,10 @@ function SettingRow({
   disabled?: boolean;
 }) {
   return (
-    <div className="liquid-glass-soft flex items-center justify-between gap-4 rounded-[1.5rem] px-5 py-4">
+    <div className="liquid-glass-soft flex items-center justify-between gap-4 rounded-[1.65rem] px-5 py-5 md:px-6">
       <div>
         <h3 className="text-base font-semibold">{title}</h3>
-        <p className="mt-1 text-sm text-[var(--muted)]">{description}</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{description}</p>
       </div>
       <ToggleSwitch checked={checked} onChange={onChange} disabled={disabled} />
     </div>
@@ -45,15 +45,15 @@ export function SettingsPanel() {
   const canUseAccountMode = session.status === "authenticated" && Boolean(user);
 
   return (
-    <section className="space-y-6">
-      <div className="liquid-glass rounded-[2rem] px-6 py-8">
-        <div className="mb-6 flex items-start gap-4">
+    <section className="space-y-7">
+      <div className="liquid-glass rounded-[2.2rem] px-6 py-8 md:px-8 md:py-10">
+        <div className="mb-8 flex items-start gap-4">
           <div className="rounded-2xl bg-[var(--accent-soft)] p-3 text-[var(--accent)]">
             <UserRound className="size-6" />
           </div>
           <div>
             <h1 className="text-3xl font-semibold">Settings</h1>
-            <p className="mt-2 max-w-2xl text-sm text-[var(--muted)]">
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
               Guest and account data stay isolated. Switching modes never merges watchlists, playback
               progress, or settings.
             </p>
@@ -138,7 +138,7 @@ export function SettingsPanel() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
             icon: ShieldBan,
@@ -161,10 +161,10 @@ export function SettingsPanel() {
             description: "Mode-aware UI waits for settings bootstrap before touching user-scoped data.",
           },
         ].map(({ icon: Icon, title, description }) => (
-          <div key={title} className="liquid-glass-soft rounded-[1.5rem] px-5 py-4">
+          <div key={title} className="liquid-glass-soft rounded-[1.6rem] px-5 py-5">
             <Icon className="size-5 text-[var(--accent)]" />
             <h2 className="mt-3 text-lg font-semibold">{title}</h2>
-            <p className="mt-2 text-sm text-[var(--muted)]">{description}</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{description}</p>
           </div>
         ))}
       </div>

@@ -47,7 +47,7 @@ export default async function TitlePage({
   }
 
   return (
-    <div className="pb-12">
+    <div className="pb-14">
       <section className="relative overflow-hidden border-b border-white/8">
         <div className="absolute inset-0">
           <Image
@@ -65,17 +65,18 @@ export default async function TitlePage({
             className="scale-[1.03] object-cover object-center blur-[2px] brightness-[0.38]"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#05070b] via-[#05070bf2] to-[#05070b30]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#05070b] via-[#05070b99] to-[#05070b80]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#060912] via-[#060912f2] to-[#06091238]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#060912] via-[#06091299] to-[#06091280]" />
 
-        <div className="page-shell relative z-10 py-10 md:py-12">
-          <div className="liquid-glass rounded-[2rem] px-6 py-7 md:px-8 md:py-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <div className="page-shell relative z-10 py-12 md:py-14">
+          <div className="liquid-glass rounded-[2.2rem] px-6 py-8 md:px-8 md:py-9">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-10">
               <div className="max-w-3xl flex-1">
                 <p className="text-xs uppercase tracking-[0.32em] text-[var(--muted)]">{media.mediaType}</p>
                 <h1 className="mt-3 text-4xl font-semibold leading-none sm:text-5xl md:text-6xl">{media.title}</h1>
                 {media.tagline ? <p className="mt-4 text-xl text-white/80">{media.tagline}</p> : null}
-                <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+
+                <div className="mt-6 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
                   {media.rating ? (
                     <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2">
                       <Star className="size-4 fill-[var(--accent)] text-[var(--accent)]" />
@@ -103,20 +104,20 @@ export default async function TitlePage({
                   ) : null}
                 </div>
 
-                <p className="mt-6 max-w-3xl text-base leading-8 text-[var(--muted)]">{media.overview}</p>
+                <p className="mt-7 max-w-3xl text-base leading-8 text-[var(--muted)]">{media.overview}</p>
 
-                <div className="mt-7">
+                <div className="mt-8">
                   <TitleActions media={media} />
                 </div>
               </div>
 
-              <div className="mx-auto w-full max-w-[220px] shrink-0 overflow-hidden rounded-[1.6rem] border border-white/10 bg-black/35 lg:mx-0">
-                <div className="relative aspect-[2/3]">
+              <div className="mx-auto w-full max-w-[248px] shrink-0 overflow-hidden rounded-[1.9rem] border border-white/10 bg-black/35 p-3 shadow-[0_18px_40px_rgba(0,0,0,0.28)] lg:mx-0">
+                <div className="relative aspect-[2/3] overflow-hidden rounded-[1.4rem]">
                   <Image
                     src={media.posterPath ? `https://image.tmdb.org/t/p/w500${media.posterPath}` : "/512x512.png"}
                     alt={media.title}
                     fill
-                    sizes="220px"
+                    sizes="248px"
                     className="object-cover"
                   />
                 </div>
@@ -126,25 +127,25 @@ export default async function TitlePage({
         </div>
       </section>
 
-      <section className="page-shell grid gap-8 py-10 lg:grid-cols-[1.2fr,0.8fr]">
-        <div className="liquid-glass rounded-[2rem] px-6 py-6">
+      <section className="page-shell grid gap-8 py-12 md:py-14 lg:grid-cols-[1.2fr,0.8fr]">
+        <div className="liquid-glass rounded-[2.1rem] px-6 py-6 md:px-7 md:py-7">
           <h2 className="text-2xl font-semibold">Cast</h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {media.cast.map((person) => (
-              <div key={`${person.name}-${person.character}`} className="liquid-glass-soft rounded-[1.5rem] px-4 py-4">
+              <div key={`${person.name}-${person.character}`} className="liquid-glass-soft rounded-[1.6rem] px-5 py-5">
                 <p className="text-base font-semibold">{person.name}</p>
-                <p className="mt-1 text-sm text-[var(--muted)]">{person.character}</p>
+                <p className="mt-2 text-sm text-[var(--muted)]">{person.character}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="liquid-glass rounded-[2rem] px-6 py-6">
+        <div className="space-y-7">
+          <div className="liquid-glass rounded-[2.1rem] px-6 py-6 md:px-7 md:py-7">
             <h2 className="text-2xl font-semibold">Genres</h2>
-            <div className="mt-4 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap gap-3">
               {media.genres.map((genre) => (
-                <span key={genre.id} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--muted)]">
+                <span key={genre.id} className="rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-[var(--muted)]">
                   {genre.name}
                 </span>
               ))}
@@ -152,13 +153,13 @@ export default async function TitlePage({
           </div>
 
           {media.seasons.length > 0 ? (
-            <div className="liquid-glass rounded-[2rem] px-6 py-6">
+            <div className="liquid-glass rounded-[2.1rem] px-6 py-6 md:px-7 md:py-7">
               <h2 className="text-2xl font-semibold">Seasons</h2>
-              <div className="mt-5 space-y-3">
+              <div className="mt-5 space-y-4">
                 {media.seasons.map((season) => (
-                  <div key={season.seasonNumber} className="liquid-glass-soft rounded-[1.5rem] px-4 py-4">
+                  <div key={season.seasonNumber} className="liquid-glass-soft rounded-[1.6rem] px-5 py-5">
                     <p className="text-base font-semibold">{season.name}</p>
-                    <p className="mt-1 text-sm text-[var(--muted)]">{season.episodeCount} episodes</p>
+                    <p className="mt-2 text-sm text-[var(--muted)]">{season.episodeCount} episodes</p>
                   </div>
                 ))}
               </div>

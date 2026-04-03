@@ -24,18 +24,18 @@ export default function RegisterPage() {
   const isBusy = session.status === "authenticating";
 
   return (
-    <div className="page-shell py-12">
-      <div className="grid gap-6 lg:grid-cols-[1fr,0.95fr]">
-        <section className="liquid-glass rounded-[2rem] px-6 py-8">
+    <div className="page-shell py-12 md:py-16">
+      <div className="grid gap-7 lg:grid-cols-[1fr,0.95fr]">
+        <section className="liquid-glass rounded-[2.2rem] px-6 py-8 md:px-8 md:py-10">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Create account</p>
           <h1 className="mt-3 text-4xl font-semibold">Provision your GrubX profile</h1>
-          <p className="mt-3 max-w-xl text-sm text-[var(--muted)]">
+          <p className="mt-4 max-w-xl text-sm leading-7 text-[var(--muted)]">
             Registration creates a Firebase identity. From there you can switch between account and guest mode
             without merging data.
           </p>
 
           <form
-            className="mt-8 space-y-4"
+            className="mt-9 space-y-4"
             onSubmit={(event) => {
               event.preventDefault();
               void register(email, username, password)
@@ -72,7 +72,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isBusy}
-              className="w-full rounded-full bg-[var(--accent)] px-5 py-4 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-60"
+              className="w-full rounded-full bg-[var(--accent)] px-5 py-[1.125rem] text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-60"
             >
               <span className="inline-flex items-center gap-2">
                 {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : null}
@@ -92,13 +92,13 @@ export default function RegisterPage() {
                 })
                 .catch((error: unknown) => toast.error(error instanceof Error ? error.message : "GitHub sign-in failed."))
             }
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-white/10 px-5 py-4 text-sm text-white transition hover:border-white/20 disabled:opacity-60"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-white/10 px-5 py-[1.125rem] text-sm text-white transition hover:border-white/20 disabled:opacity-60"
           >
             <Github className="size-4" />
             Continue with GitHub
           </button>
 
-          <p className="mt-6 text-sm text-[var(--muted)]">
+          <p className="mt-7 text-sm text-[var(--muted)]">
             Already have an account?{" "}
             <Link href="/login" className="text-white underline decoration-white/20 underline-offset-4">
               Log in
@@ -106,17 +106,17 @@ export default function RegisterPage() {
           </p>
         </section>
 
-        <section className="liquid-glass-soft rounded-[2rem] px-6 py-8">
+        <section className="liquid-glass-soft rounded-[2.2rem] px-6 py-8 md:px-8 md:py-10">
           <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Mode behavior</p>
           <h2 className="mt-3 text-3xl font-semibold">Account and guest stay separate</h2>
-          <ul className="mt-8 space-y-4 text-sm text-[var(--muted)]">
-            <li className="rounded-[1.5rem] border border-white/10 bg-black/20 px-5 py-4">
+          <ul className="mt-9 space-y-4 text-sm text-[var(--muted)]">
+            <li className="rounded-[1.6rem] border border-white/10 bg-black/20 px-5 py-4 leading-7">
               Account mode writes only to <code>users/{"{uid}"}/...</code> in Firestore.
             </li>
-            <li className="rounded-[1.5rem] border border-white/10 bg-black/20 px-5 py-4">
+            <li className="rounded-[1.6rem] border border-white/10 bg-black/20 px-5 py-4 leading-7">
               Guest mode writes only to <code>grubx_*</code> local storage keys.
             </li>
-            <li className="rounded-[1.5rem] border border-white/10 bg-black/20 px-5 py-4">
+            <li className="rounded-[1.6rem] border border-white/10 bg-black/20 px-5 py-4 leading-7">
               Switching modes clears UI state immediately and never auto-merges records.
             </li>
           </ul>
