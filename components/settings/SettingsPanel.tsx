@@ -4,6 +4,8 @@ import { useTransition } from "react";
 import { Film, HardDriveDownload, ShieldBan, Sparkles, UserRound } from "lucide-react";
 import { toast } from "sonner";
 
+import { ContinueWatchingRow } from "@/components/user/ContinueWatchingRow";
+import { WatchlistRow } from "@/components/user/WatchlistRow";
 import { ToggleSwitch } from "@/components/settings/ToggleSwitch";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { useSettingsContext } from "@/context/SettingsContext";
@@ -168,6 +170,58 @@ export function SettingsPanel() {
           </div>
         ))}
       </div>
+
+      {session.status === "authenticated" ? (
+        <div className="space-y-6">
+          <div className="liquid-glass rounded-[2rem] px-6 py-7 md:px-8">
+            <p className="text-xs uppercase tracking-[0.3em] text-[var(--muted)]">Account Data</p>
+            <h2 className="mt-3 text-2xl font-semibold">Watchlist and Continue Watching</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--muted)]">
+              Signed in as <span className="text-white">{user?.email ?? user?.username ?? "account user"}</span>.
+              {settings.guestMode
+                ? " Guest mode is still active, so Firebase-backed watchlist and playback history are paused until you switch back to account mode."
+                : " Your Firebase-backed watchlist and playback history are active below."}
+            </p>
+
+            {settings.guestMode && canUseAccountMode ? (
+              <div className="mt-5">
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await setGuestMode(false);
+                      toast.success("Account mode enabled.");
+                    })
+                  }
+                  className="rounded-full bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-black transition hover:brightness-110 disabled:opacity-60"
+                >
+                  Use account mode
+                </button>
+              </div>
+            ) : null}
+          </div>
+
+          {!settings.guestMode ? (
+            <div className="space-y-8">
+              <ContinueWatchingRow
+                showEmpty
+                title="Continue Watching"
+                description="Resume titles synced to your account."
+                emptyTitle="No account playback yet"
+                emptyDescription="Once you start watching while account mode is active, your progress will show up here."
+              />
+              <WatchlistRow
+                showEmpty
+                title="Account Watchlist"
+                description="Titles saved while account mode is active."
+                emptyTitle="No saved titles yet"
+                emptyDescription="Add a movie or show to your watchlist and it will appear here."
+              />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }

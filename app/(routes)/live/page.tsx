@@ -289,10 +289,10 @@ export default function LiveTVPage() {
       </section>
 
       {activeMatch ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/88 px-4 py-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/88 px-4 pb-4 pt-24 backdrop-blur-md md:pt-28">
           <button type="button" className="absolute inset-0" onClick={closeOverlay} aria-label="Close live stream overlay" />
 
-          <div className="liquid-glass relative z-[91] flex h-[min(90vh,960px)] w-full max-w-7xl flex-col overflow-hidden rounded-[2.2rem] p-4">
+          <div className="liquid-glass relative z-[41] flex h-[min(calc(100vh-7rem),960px)] w-full max-w-7xl flex-col overflow-hidden rounded-[2.2rem] p-4 md:h-[min(calc(100vh-8rem),960px)]">
             <div className="flex items-center justify-between gap-4 border-b border-white/10 bg-black/35 px-5 py-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-[var(--muted)]">Live Stream</p>
@@ -321,6 +321,7 @@ export default function LiveTVPage() {
                     title={`${activeMatch.title} stream`}
                     className="absolute inset-0 h-full w-full border-0"
                     allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                     allowFullScreen
                   />
                 ) : (

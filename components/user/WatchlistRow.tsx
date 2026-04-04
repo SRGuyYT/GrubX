@@ -1,11 +1,24 @@
 "use client";
 
+import { EmptyState } from "@/components/feedback/EmptyState";
 import { MediaRow } from "@/components/media/MediaRow";
 import { useSettingsContext } from "@/context/SettingsContext";
 import { useWatchlistSubscription } from "@/hooks/useWatchlistSubscription";
 import type { MediaItem } from "@/types/media";
 
-export function WatchlistRow() {
+export function WatchlistRow({
+  showEmpty = false,
+  title = "Watchlist",
+  description = "Realtime from your active storage mode.",
+  emptyTitle = "Your watchlist is empty",
+  emptyDescription = "Save a movie or show and it will appear here.",
+}: {
+  showEmpty?: boolean;
+  title?: string;
+  description?: string;
+  emptyTitle?: string;
+  emptyDescription?: string;
+}) {
   const { ready } = useSettingsContext();
   const query = useWatchlistSubscription();
   const items = (query.data ?? []).map(
@@ -24,9 +37,13 @@ export function WatchlistRow() {
       }) satisfies MediaItem,
   );
 
-  if (!ready || query.isBootstrapping || items.length === 0) {
+  if (!ready || query.isBootstrapping) {
     return null;
   }
 
-  return <MediaRow title="Watchlist" description="Realtime from your active storage mode." items={items} />;
+  if (items.length === 0) {
+    return showEmpty ? <EmptyState title={emptyTitle} description={emptyDescription} /> : null;
+  }
+
+  return <MediaRow title={title} description={description} items={items} />;
 }

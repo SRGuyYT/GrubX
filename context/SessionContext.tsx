@@ -72,6 +72,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       }
 
       try {
+        await nextUser.getIdToken();
         const provider = await deriveProvider(nextUser);
         setSession({
           status: "authenticated",

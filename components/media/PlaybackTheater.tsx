@@ -165,17 +165,17 @@ export function PlaybackTheater({
   }
 
   return (
-    <div className="fixed inset-0 z-[85] flex items-center justify-center bg-black/88 px-4 py-4 backdrop-blur-md">
+    <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/88 px-4 pb-4 pt-24 backdrop-blur-md md:pt-28">
       {!isTheaterMode ? (
         <button type="button" aria-label="Close player overlay" className="absolute inset-0" onClick={onClose} />
       ) : null}
 
       <div
         className={cn(
-          "relative z-[86] flex overflow-hidden bg-black transition-all duration-300",
+          "relative z-[41] flex overflow-hidden bg-black transition-all duration-300",
           isTheaterMode
-            ? "h-full w-full rounded-none"
-            : "liquid-glass h-[min(88vh,880px)] w-full max-w-6xl flex-col rounded-[2rem] p-4"
+            ? "liquid-glass h-[calc(100vh-7rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col rounded-[2rem] p-4 md:h-[calc(100vh-8rem)]"
+            : "liquid-glass h-[min(calc(100vh-7rem),880px)] w-full max-w-6xl flex-col rounded-[2rem] p-4"
         )}
       >
         <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.4rem] border border-white/10 bg-black">

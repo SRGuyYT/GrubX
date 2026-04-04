@@ -30,6 +30,24 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 const buildScope = (mode: AppDataMode, uid: string | null): SettingsScope =>
   mode === "account" && uid ? { mode: "account", uid } : { mode: "guest" };
 
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+
+const loadSettingsWithRetry = async (scope: SettingsScope) => {
+  try {
+    return await dataLayer.loadSettings(scope);
+  } catch (error) {
+    if (scope.mode !== "account") {
+      throw error;
+    }
+
+    await wait(450);
+    return dataLayer.loadSettings(scope);
+  }
+};
+
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { initialized, session } = useSession();
@@ -52,7 +70,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const nextMode: AppDataMode = canUseAccount ? (preferredMode === "guest" ? "guest" : "account") : "guest";
       const nextScope = buildScope(nextMode, session.firebaseUid);
       try {
-        const loadedSettings = await dataLayer.loadSettings(nextScope);
+        const loadedSettings = await loadSettingsWithRetry(nextScope);
         const resolvedSettings =
           nextMode === "guest"
             ? { ...loadedSettings, guestMode: true }
@@ -126,7 +144,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         dataLayer.clearModeScopedCache(queryClient, mode);
         const nextScope = buildScope(nextMode, session.firebaseUid);
         try {
-          const loadedSettings = await dataLayer.loadSettings(nextScope);
+          const loadedSettings = await loadSettingsWithRetry(nextScope);
           setMode(nextMode);
           setSettings(
             nextMode === "guest"
