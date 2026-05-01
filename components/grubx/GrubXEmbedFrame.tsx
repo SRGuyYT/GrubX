@@ -5,8 +5,6 @@ import { parsePlaybackOptions } from "@/lib/grubx/params";
 import { assertGrubXProvider, resolveGrubXProviderUrl } from "@/lib/grubx/providers";
 import type { GrubXMediaType } from "@/types/grubx";
 
-const readParam = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
-
 export function GrubXEmbedFrame({
   provider,
   type,
@@ -32,15 +30,8 @@ export function GrubXEmbedFrame({
       episode,
       parsePlaybackOptions(searchParams),
     );
-    const strictSandbox = readParam(searchParams.strictSandbox) === "true";
 
-    return (
-      <GrubXEmbedClientFrame
-        source={source}
-        title={`${selectedProvider.name} ${type} embed`}
-        strictSandbox={strictSandbox}
-      />
-    );
+    return <GrubXEmbedClientFrame source={source} title={`${selectedProvider.name} ${type} embed`} />;
   } catch {
     notFound();
   }

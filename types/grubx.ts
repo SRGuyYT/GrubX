@@ -34,7 +34,6 @@ export type GrubXProvider = {
   supportsMovie: boolean;
   supportsTv: boolean;
   compatibilityMode?: boolean;
-  requiresRelaxedSandbox?: boolean;
   notes?: string;
   movie(id: string, options?: PlaybackOptions): string;
   tv(id: string, season: number, episode: number, options?: PlaybackOptions): string;
@@ -54,7 +53,6 @@ export type GrubXServerCandidate = {
   score: number;
   status: "untested" | "testing" | "ready" | "failed" | "blocked";
   compatibilityMode?: boolean;
-  requiresRelaxedSandbox?: boolean;
   safetyLabel?: "Standard" | "Compatibility" | "Reported by users";
   reason?: string;
 };

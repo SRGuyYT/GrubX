@@ -96,7 +96,6 @@ const buildCandidate = async ({
   episode,
   providerOptions,
   allowLimitedProtectionProviders,
-  strictSandbox,
 }: {
   provider: GrubXProvider;
   mediaType: "movie" | "tv";
@@ -105,7 +104,6 @@ const buildCandidate = async ({
   episode: number;
   providerOptions: ReturnType<typeof parsePlaybackOptions>;
   allowLimitedProtectionProviders: boolean;
-  strictSandbox: boolean;
 }): Promise<GrubXServerCandidate> => {
   if (!isProviderAllowed(provider.id, { allowLimitedProtectionProviders })) {
     return {
@@ -115,7 +113,6 @@ const buildCandidate = async ({
       latencyMs: null,
       score: -9999,
       status: "blocked",
-      requiresRelaxedSandbox: provider.requiresRelaxedSandbox,
       reason: "This server is turned off.",
     };
   }
@@ -129,7 +126,6 @@ const buildCandidate = async ({
     episode,
     options: providerOptions,
   });
-  const embedUrl = strictSandbox ? `${embedPath}${embedPath.includes("?") ? "&" : "?"}strictSandbox=true` : embedPath;
   const probe = await probeCandidate(providerUrl);
   const score = scoreServerCandidate({
     safety: provider.safety,
@@ -140,12 +136,11 @@ const buildCandidate = async ({
   return {
     providerId: provider.id,
     providerName: provider.name,
-    embedUrl,
+    embedUrl: embedPath,
     latencyMs: probe.ok ? probe.latencyMs : null,
     score,
     status: probe.ok ? "ready" : "failed",
     compatibilityMode: provider.compatibilityMode,
-    requiresRelaxedSandbox: provider.requiresRelaxedSandbox,
     safetyLabel:
       provider.safety === "standard"
         ? "Standard"
@@ -173,7 +168,6 @@ export async function GET(request: Request) {
     const progress = progressValue ? Math.max(0, Number(progressValue)) : null;
     const requestedProvider = searchParams.get("provider")?.trim().toLowerCase() ?? null;
     const allowLimitedProtectionProviders = searchParams.get("allowLimitedProtectionProviders") === "true";
-    const strictSandbox = searchParams.get("strictSandbox") === "true";
     const enabledProviders = new Set(
       (searchParams.get("enabledProviders") ?? "")
         .split(",")
@@ -220,7 +214,6 @@ export async function GET(request: Request) {
           episode,
           providerOptions,
           allowLimitedProtectionProviders,
-          strictSandbox,
         }),
       ),
     );

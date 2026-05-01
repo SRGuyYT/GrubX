@@ -284,26 +284,10 @@ export function SettingsPanel() {
               onChange={(value) => setSetting("popupBlockerStrictness", value, "Popup strictness updated.")}
             />
           </SettingRow>
-          <SettingRow title="Avoid limited-protection servers" description="Prefer providers that work inside strict sandboxing.">
+          <SettingRow title="Prefer standard servers" description="Try standard providers before compatibility providers when both are available.">
             <ToggleSwitch
               checked={settings.avoidLimitedProtectionServers}
               onChange={(checked) => setSetting("avoidLimitedProtectionServers", checked, "Server preference updated.")}
-              disabled={isPending}
-            />
-          </SettingRow>
-          <SettingRow
-            title="Strict iframe sandbox"
-            description="Keep this on for the safest playback. Turn it off only if a provider says sandboxing must be disabled."
-          >
-            <ToggleSwitch
-              checked={settings.strictIframeSandbox}
-              onChange={(checked) =>
-                setSetting(
-                  "strictIframeSandbox",
-                  checked,
-                  checked ? "Player sandboxing enabled." : "Player sandboxing disabled for playback.",
-                )
-              }
               disabled={isPending}
             />
           </SettingRow>

@@ -5,16 +5,12 @@ import Link from "next/link";
 
 import { hasRiskConsent, isUnder13Suspended } from "@/lib/grubx/consent";
 
-const SAFE_IFRAME_SANDBOX = "allow-scripts allow-same-origin allow-presentation allow-forms";
-
 export function GrubXEmbedClientFrame({
   source,
   title,
-  strictSandbox,
 }: {
   source: string;
   title: string;
-  strictSandbox: boolean;
 }) {
   const [allowed, setAllowed] = useState(false);
   const [blockedReason, setBlockedReason] = useState<"under13" | "consent" | null>(null);
@@ -67,7 +63,6 @@ export function GrubXEmbedClientFrame({
       allow="fullscreen; picture-in-picture; encrypted-media"
       allowFullScreen
       referrerPolicy="no-referrer"
-      sandbox={strictSandbox ? SAFE_IFRAME_SANDBOX : undefined}
       style={{ border: 0, width: "100vw", height: "100dvh", display: "block", background: "#000" }}
     />
   );

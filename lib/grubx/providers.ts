@@ -13,7 +13,6 @@ const createProvider = (
     supportsMovie?: boolean;
     supportsTv?: boolean;
     compatibilityMode?: boolean;
-    requiresRelaxedSandbox?: boolean;
     notes?: string;
   },
 ): GrubXProvider => ({
@@ -25,8 +24,7 @@ const createProvider = (
   priority: options.priority,
   supportsMovie: options.supportsMovie ?? true,
   supportsTv: options.supportsTv ?? true,
-  compatibilityMode: options.compatibilityMode ?? options.requiresRelaxedSandbox ?? true,
-  requiresRelaxedSandbox: options.requiresRelaxedSandbox,
+  compatibilityMode: options.compatibilityMode ?? true,
   notes: options.notes,
   capabilities,
   movie(mediaId, options) {
@@ -94,7 +92,6 @@ export const GRUBX_PROVIDERS = [
     supportsMovie: true,
     supportsTv: true,
     compatibilityMode: true,
-    requiresRelaxedSandbox: false,
     capabilities: {
       subtitles: true,
       quality: true,

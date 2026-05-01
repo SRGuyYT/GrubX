@@ -53,7 +53,6 @@ const PROVIDER_FAILURES_KEY = "grubx.providerFailures";
 const PROVIDER_SUCCESSES_KEY = "grubx.providerSuccesses";
 const PREFERRED_PROVIDER_KEY = "grubx.preferredProvider";
 const POPUP_MONITOR_WINDOW_MS = 3500;
-const STRICT_IFRAME_SANDBOX = "allow-scripts allow-same-origin allow-presentation allow-forms";
 
 const reportReasons: Array<{ value: GrubXProviderReportReason; label: string }> = [
   { value: "popups", label: "Popups / new tabs" },
@@ -157,7 +156,6 @@ export function PlaybackTheater({
   const [playbackConsentReady, setPlaybackConsentReady] = useState(false);
   const [showAgeGate, setShowAgeGate] = useState(false);
   const [showRiskConsent, setShowRiskConsent] = useState(false);
-  const [sandboxFallbackActive, setSandboxFallbackActive] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [serverSheetOpen, setServerSheetOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -208,8 +206,6 @@ export function PlaybackTheater({
       settings.embedQualityMode,
       settings.providerSettings,
       settings.uiTheme,
-      settings.strictIframeSandbox,
-      sandboxFallbackActive,
       progressQuery.data?.currentTime ?? null,
     ],
     queryFn: async ({ signal }: { signal: AbortSignal }) => {
@@ -226,7 +222,6 @@ export function PlaybackTheater({
         chromecast: "true",
         hideServer: "false",
         overlay: "true",
-        strictSandbox: settings.strictIframeSandbox && !sandboxFallbackActive ? "true" : "false",
         theme: settings.uiTheme,
         title,
         allowLimitedProtectionProviders: settings.allowLimitedProtectionProviders ? "true" : "false",
@@ -284,7 +279,6 @@ export function PlaybackTheater({
         score: 70 - index,
         status: "ready" as const,
         compatibilityMode: true,
-        requiresRelaxedSandbox: false,
         safetyLabel: "Compatibility" as const,
         reason: "Custom provider. Built-in ad and popup review is not applied yet.",
       }));
@@ -343,7 +337,6 @@ export function PlaybackTheater({
     () => candidates.find((candidate) => candidate.providerId === selectedProvider) ?? null,
     [candidates, selectedProvider],
   );
-  const iframeSandbox = settings.strictIframeSandbox && !sandboxFallbackActive ? STRICT_IFRAME_SANDBOX : undefined;
 
   const readyCandidates = useMemo(
     () => candidates.filter((candidate) => candidate.status === "ready"),
@@ -389,7 +382,6 @@ export function PlaybackTheater({
       setPlaybackConsentReady(false);
       setShowAgeGate(false);
       setShowRiskConsent(false);
-      setSandboxFallbackActive(false);
       setControlsVisible(true);
       setServerSheetOpen(false);
       setReportOpen(false);
@@ -409,7 +401,6 @@ export function PlaybackTheater({
     setPlaybackConsentReady(false);
     setShowAgeGate(false);
     setShowRiskConsent(false);
-    setSandboxFallbackActive(false);
     setControlsVisible(true);
     activatedAtRef.current = null;
     setWatchHistory(getWatchHistory());
@@ -465,7 +456,6 @@ export function PlaybackTheater({
     setControlsUnlocked(false);
     setIframeFailed(false);
     setPopupSuspected(false);
-    setSandboxFallbackActive(false);
     activatedAtRef.current = null;
   }, [mediaId, mediaType, selectedEpisode, selectedProvider, selectedSeason]);
 
@@ -645,7 +635,6 @@ export function PlaybackTheater({
     setControlsUnlocked(false);
     setIframeFailed(false);
     setPopupSuspected(false);
-    setSandboxFallbackActive(false);
     setServerSheetOpen(false);
     savePreferredProvider(providerId);
   };
@@ -675,13 +664,6 @@ export function PlaybackTheater({
     }
 
     bumpProviderStat(PROVIDER_FAILURES_KEY, activeCandidate.providerId, "failures");
-    if (settings.strictIframeSandbox && !sandboxFallbackActive && playbackConsentReady) {
-      setSandboxFallbackActive(true);
-      setControlsVisible(true);
-      toast.message("Trying compatibility mode for this server...");
-      return;
-    }
-
     setIframeFailed(true);
     tryNextServer();
   };
@@ -818,7 +800,7 @@ export function PlaybackTheater({
       <div className="relative h-[100dvh] w-screen overflow-hidden bg-black">
         <div
           className={cn(
-            "absolute inset-x-0 z-30 border-white/10 bg-black/68 px-3 backdrop-blur-2xl transition-transform duration-300 sm:px-5",
+            "absolute inset-x-0 z-30 max-h-[44dvh] overflow-y-auto border-white/10 bg-black/68 px-3 backdrop-blur-2xl transition-transform duration-300 sm:px-5 md:max-h-none md:px-6",
             controlDock === "bottom"
               ? "bottom-0 border-t pb-[calc(0.65rem+env(safe-area-inset-bottom))] pt-2"
               : "top-0 border-b pb-2 pt-[calc(0.65rem+env(safe-area-inset-top))]",
@@ -829,8 +811,8 @@ export function PlaybackTheater({
                 : "-translate-y-full",
           )}
         >
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
+          <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-start md:justify-between lg:flex-nowrap lg:items-center">
+            <div className="flex min-w-0 items-center gap-3 md:min-w-[250px] md:flex-1 lg:max-w-[42vw]">
               <button
                 type="button"
                 onClick={onClose}
@@ -843,11 +825,11 @@ export function PlaybackTheater({
                 <p className="text-xs uppercase tracking-[0.24em] text-[var(--muted)]">
                   {mediaType === "tv" ? `Season ${selectedSeason} Episode ${selectedEpisode}` : "Movie playback"}
                 </p>
-                <h3 className="line-clamp-1 text-base font-semibold text-white sm:text-xl">{title}</h3>
+                <h3 className="line-clamp-1 text-base font-semibold text-white sm:text-xl md:text-lg lg:text-xl">{title}</h3>
               </div>
             </div>
 
-            <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 lg:justify-end">
+            <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 md:flex-wrap md:justify-end md:overflow-visible md:pb-0 lg:flex-nowrap">
               {mediaType === "tv" && resolvedSeasons.length > 0 ? (
                 <>
                   <select
@@ -889,9 +871,12 @@ export function PlaybackTheater({
                       : "No server selected"}
                 </span>
               </div>
-              {activeCandidate?.compatibilityMode || !settings.strictIframeSandbox || sandboxFallbackActive ? (
-                <span className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-red-300/25 bg-red-500/12 px-4 text-xs font-semibold text-red-100">
-                  Compatibility mode is active. Ads and popups may appear from third-party providers.
+              {activeCandidate?.compatibilityMode ? (
+                <span className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-red-300/25 bg-red-500/12 px-3 text-xs font-semibold text-red-100 md:px-4">
+                  <span className="xl:hidden">Compatibility mode active</span>
+                  <span className="hidden xl:inline">
+                    Compatibility mode is active. Ads and popups may appear from third-party providers.
+                  </span>
                 </span>
               ) : null}
               <Link
@@ -1002,6 +987,12 @@ export function PlaybackTheater({
           </button>
         ) : null}
 
+        <div className="pointer-events-none absolute inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 sm:hidden">
+          <div className="rounded-[1rem] border border-white/12 bg-black/74 px-4 py-3 text-center text-xs font-semibold leading-5 text-white shadow-2xl backdrop-blur-xl">
+            GrubX is not fully compatible with phones. Please move to a bigger screen if possible.
+          </div>
+        </div>
+
         <div className="absolute inset-0 bg-black">
             {playerSourceQuery.isPending ? (
               <div className="absolute inset-0 flex items-center justify-center px-8 text-center text-[var(--muted)]">
@@ -1094,7 +1085,6 @@ export function PlaybackTheater({
                 className={cn("absolute inset-0 h-full w-full border-0", settings.blockPopups && !controlsUnlocked ? "pointer-events-none" : "")}
                 allow="fullscreen; picture-in-picture; encrypted-media"
                 referrerPolicy="no-referrer"
-                sandbox={iframeSandbox}
                 allowFullScreen
                 onLoad={() => {
                   markActiveProviderSuccess();

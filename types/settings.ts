@@ -35,7 +35,6 @@ export type Settings = {
   inlineTrailerMuted: boolean;
   showPlaybackTips: boolean;
   blockPopups: boolean;
-  strictIframeSandbox: boolean;
   avoidLimitedProtectionServers: boolean;
   allowLimitedProtectionProviders: boolean;
   autoplayPlayback: boolean;

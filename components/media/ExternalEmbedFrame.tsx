@@ -21,7 +21,6 @@ export function ExternalEmbedFrame({
       allow="fullscreen; picture-in-picture; encrypted-media"
       allowFullScreen
       referrerPolicy="no-referrer"
-      sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
       onLoad={onLoad}
       onError={onError}
     />
