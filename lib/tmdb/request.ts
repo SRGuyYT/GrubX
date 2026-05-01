@@ -22,7 +22,18 @@ const ALLOWED_TMDB_RULES: AllowedPathRule[] = [
   {
     pattern: /^\/discover\/(movie|tv)$/,
     ttlSeconds: 300,
-    params: ["with_genres", "page", "sort_by"],
+    params: [
+      "with_genres",
+      "page",
+      "sort_by",
+      "certification_country",
+      "certification",
+      "with_content_rating",
+      "primary_release_date.gte",
+      "primary_release_date.lte",
+      "first_air_date.gte",
+      "first_air_date.lte",
+    ],
   },
   {
     pattern: /^\/(movie|tv)\/(popular|top_rated)$/,

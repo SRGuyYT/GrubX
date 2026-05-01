@@ -70,7 +70,7 @@ export default async function NotFound() {
                   href="/live"
                   className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20"
                 >
-                  Live TV
+                  Live Sports
                 </Link>
               </div>
             </div>

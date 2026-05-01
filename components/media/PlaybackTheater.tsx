@@ -20,6 +20,7 @@ import type {
   GrubXWatchHistoryItem,
 } from "@/types/grubx";
 import type { EpisodeSummary, MediaType, SeasonSummary } from "@/types/media";
+import type { CustomProviderSettings } from "@/types/settings";
 
 type PlayerControlDock = "top" | "bottom" | "hidden";
 
@@ -106,6 +107,26 @@ const saveBlockedProvider = (providerId: string) => {
   window.localStorage.setItem(BLOCKED_PROVIDERS_KEY, JSON.stringify(Array.from(blocked)));
 };
 
+const buildCustomProviderEmbedUrl = ({
+  provider,
+  mediaType,
+  mediaId,
+  season,
+  episode,
+}: {
+  provider: CustomProviderSettings;
+  mediaType: MediaType;
+  mediaId: string;
+  season: number;
+  episode: number;
+}) =>
+  provider.embedUrlPattern
+    .replaceAll("{id}", encodeURIComponent(mediaId))
+    .replaceAll("{tmdbId}", encodeURIComponent(mediaId))
+    .replaceAll("{mediaType}", mediaType)
+    .replaceAll("{season}", String(season))
+    .replaceAll("{episode}", String(episode));
+
 export function PlaybackTheater({
   open,
   onClose,
@@ -186,6 +207,8 @@ export function PlaybackTheater({
       settings.autoplayNextEpisode,
       settings.autoplayPlayback,
       settings.allowLimitedProtectionProviders,
+      settings.embedQualityMode,
+      settings.providerSettings,
       settings.uiTheme,
       progressQuery.data?.currentTime ?? null,
     ],
@@ -206,6 +229,11 @@ export function PlaybackTheater({
         theme: settings.uiTheme,
         title,
         allowLimitedProtectionProviders: settings.allowLimitedProtectionProviders ? "true" : "false",
+        enabledProviders: Object.entries(settings.providerSettings)
+          .filter(([, enabled]) => enabled)
+          .map(([providerId]) => providerId)
+          .join(","),
+        quality: settings.embedQualityMode,
       });
 
       if (
@@ -238,8 +266,29 @@ export function PlaybackTheater({
 
   const candidates = useMemo(() => {
     const serverCandidates = playerSourceQuery.data?.candidates ?? [];
+    const customCandidates: GrubXServerCandidate[] = settings.customProviders
+      .filter((provider) => provider.enabled)
+      .filter((provider) => (mediaType === "movie" ? provider.supportsMovie : provider.supportsTv))
+      .map((provider, index) => ({
+        providerId: provider.id,
+        providerName: provider.name,
+        embedUrl: buildCustomProviderEmbedUrl({
+          provider,
+          mediaType,
+          mediaId,
+          season: selectedSeason,
+          episode: selectedEpisode,
+        }),
+        latencyMs: null,
+        score: 70 - index,
+        status: "ready" as const,
+        requiresRelaxedSandbox: false,
+        reason: "Custom provider. Built-in ad and popup review is not applied yet.",
+      }));
+    const allCandidates = [...serverCandidates, ...customCandidates];
+
     if (!open || typeof window === "undefined") {
-      return serverCandidates;
+      return allCandidates;
     }
 
     const reports = readStats(PROVIDER_REPORTS_KEY);
@@ -248,7 +297,7 @@ export function PlaybackTheater({
     const preferredProvider = readPreferredProvider();
     const locallyBlockedProviders = new Set(readBlockedProviders());
 
-    return serverCandidates
+    return allCandidates
       .map((candidate) => {
         if (locallyBlockedProviders.has(candidate.providerId)) {
           return {
@@ -299,10 +348,15 @@ export function PlaybackTheater({
       .sort((left, right) => right.score - left.score);
   }, [
     blockedProviderVersion,
+    mediaId,
+    mediaType,
     open,
     playerSourceQuery.data?.candidates,
     settings.allowLimitedProtectionProviders,
     settings.avoidLimitedProtectionServers,
+    settings.customProviders,
+    selectedEpisode,
+    selectedSeason,
   ]);
 
   const activeCandidate = useMemo(
@@ -522,11 +576,13 @@ export function PlaybackTheater({
     };
 
     document.body.style.overflow = "hidden";
+    document.body.classList.add("grubx-player-open");
     window.addEventListener("keydown", onEscape);
     window.addEventListener("message", onMessage);
 
     return () => {
       document.body.style.overflow = "auto";
+      document.body.classList.remove("grubx-player-open");
       window.removeEventListener("keydown", onEscape);
       window.removeEventListener("message", onMessage);
     };

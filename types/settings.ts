@@ -7,8 +7,26 @@ export type CardDensity = "comfortable" | "compact";
 export type PosterQuality = "balanced" | "high" | "data-saver";
 export type AudioProfile = "cinema" | "dialog" | "night";
 export type AccentTone = "ember" | "electric" | "aurora";
+export type PopupBlockerStrictness = "low" | "medium" | "high";
+export type EmbedQualityMode = "auto" | "data-saver" | "high";
+
+export type CustomProviderSettings = {
+  id: string;
+  name: string;
+  baseUrl: string;
+  embedUrlPattern: string;
+  enabled: boolean;
+  supportsMovie: boolean;
+  supportsTv: boolean;
+};
 
 export type Settings = {
+  safeMode: boolean;
+  popupBlockerStrictness: PopupBlockerStrictness;
+  recommendationsEnabled: boolean;
+  embedQualityMode: EmbedQualityMode;
+  providerSettings: Record<string, boolean>;
+  customProviders: CustomProviderSettings[];
   autoplayTrailers: boolean;
   theaterModeDefault: boolean;
   resumePlayback: boolean;

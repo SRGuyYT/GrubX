@@ -6,6 +6,7 @@ import { Play, Star } from "lucide-react";
 
 import { useSettingsContext } from "@/context/SettingsContext";
 import { cn } from "@/lib/cn";
+import { mediaItemToRecommendationItem, trackClickedItem } from "@/lib/recommendationEngine";
 import type { MediaItem, SeasonSummary } from "@/types/media";
 
 export function MovieCard({
@@ -26,6 +27,7 @@ export function MovieCard({
       <Link
         href={`/title/${media.mediaType}/${media.id}`}
         prefetch={settings.prefetchRoutes && !settings.lowBandwidthMode}
+        onClick={() => trackClickedItem(mediaItemToRecommendationItem(media))}
         className={cn(
           "relative flex h-full flex-col overflow-hidden rounded-[1.05rem] border border-white/8 bg-white/[0.035]",
           compact ? "p-2.5" : "p-3",

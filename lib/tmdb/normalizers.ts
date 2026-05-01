@@ -37,6 +37,9 @@ export const normalizeMediaItem = (item: TmdbMediaRecord, mediaType?: MediaType)
           : null,
     rating: typeof item.vote_average === "number" ? item.vote_average : null,
     voteCount: typeof item.vote_count === "number" ? item.vote_count : null,
+    genreIds: Array.isArray(item.genre_ids)
+      ? item.genre_ids.map((genreId) => Number(genreId)).filter((genreId) => Number.isFinite(genreId) && genreId > 0)
+      : [],
   };
 };
 

@@ -12,7 +12,5 @@ export const queryKeys = {
   continueWatching: ["local", "continue-watching"] as const,
   progress: (mediaId: string) => ["local", "progress", mediaId] as const,
   searchPreferences: ["local", "search-preferences"] as const,
-  updaterState: ["local", "updater-state"] as const,
   recentLive: ["local", "recent-live"] as const,
-  updateStatus: ["system", "update-status"] as const,
 };

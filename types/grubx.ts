@@ -1,21 +1,6 @@
 export type GrubXMediaType = "movie" | "tv" | "anime";
 
-export type GrubXProviderId =
-  | "vidfast"
-  | "vidfast-pro"
-  | "vidfast-in"
-  | "vidfast-io"
-  | "vidfast-me"
-  | "vidfast-net"
-  | "vidfast-pm"
-  | "vidfast-xyz"
-  | "vidcore"
-  | "vidlink"
-  | "vidfun"
-  | "vidrock"
-  | "videasy"
-  | "vidking"
-  | "zxcstream";
+export type GrubXProviderId = string;
 
 export type GrubXProviderSafety = "safe" | "unknown" | "blocked";
 

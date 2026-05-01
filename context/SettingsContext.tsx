@@ -18,6 +18,7 @@ type SettingsContextValue = {
   settings: Settings;
   updateSettings(next: Partial<Settings>): Promise<void>;
   resetSettings(): Promise<void>;
+  clearAllData(): Promise<void>;
 };
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -95,6 +96,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       },
       async resetSettings() {
         const persisted = await dataLayer.saveSettings(DEFAULT_SETTINGS);
+        setSettings(persisted);
+      },
+      async clearAllData() {
+        const persisted = await dataLayer.clearAllLocalData();
         setSettings(persisted);
       },
     }),

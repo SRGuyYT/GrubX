@@ -1,13 +1,13 @@
 "use client";
 
 import { type FormEvent, useState, useTransition } from "react";
-import { Music2, Search, Youtube } from "lucide-react";
+import { Search, Youtube } from "lucide-react";
 
 import { ExternalEmbedFrame } from "@/components/media/ExternalEmbedFrame";
 import type { YouTubeSearchItem } from "@/types/external";
 
-export function YouTubeConsole({ musicMode = false }: { musicMode?: boolean }) {
-  const [query, setQuery] = useState(musicMode ? "official music video" : "");
+export function YouTubeConsole() {
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<YouTubeSearchItem[]>([]);
   const [selected, setSelected] = useState<YouTubeSearchItem | null>(null);
   const [message, setMessage] = useState("");
@@ -17,7 +17,7 @@ export function YouTubeConsole({ musicMode = false }: { musicMode?: boolean }) {
     event.preventDefault();
     setMessage("");
     startTransition(async () => {
-      const params = new URLSearchParams({ q: query, music: musicMode ? "true" : "false" });
+      const params = new URLSearchParams({ q: query });
       const response = await fetch(`/api/youtube/search?${params.toString()}`, { credentials: "same-origin" });
       const body = (await response.json().catch(() => null)) as
         | { error?: string; setupRequired?: boolean; results?: YouTubeSearchItem[] }
@@ -44,19 +44,15 @@ export function YouTubeConsole({ musicMode = false }: { musicMode?: boolean }) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
         <div className="min-w-0">
           <div className="flex items-center gap-3">
-            {musicMode ? <Music2 className="size-5 text-[var(--accent)]" /> : <Youtube className="size-5 text-[var(--accent)]" />}
-            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--accent)]">
-              {musicMode ? "YT Music" : "YouTube"}
-            </p>
+            <Youtube className="size-5 text-[var(--accent)]" />
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--accent)]">YouTube</p>
           </div>
-          <h1 className="mt-4 text-4xl font-bold text-white md:text-6xl">
-            {musicMode ? "Find music on YouTube" : "Watch YouTube inside GrubX"}
-          </h1>
+          <h1 className="mt-4 text-4xl font-bold text-white md:text-6xl">Watch YouTube inside GrubX</h1>
           <form onSubmit={search} className="mt-7 flex flex-col gap-3 sm:flex-row">
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder={musicMode ? "Search songs, artists, live sessions..." : "Search videos..."}
+              placeholder="Search videos..."
               className="min-h-11 flex-1 rounded-full border border-white/10 bg-black/40 px-5 py-3 text-sm text-white outline-none placeholder:text-[var(--muted)]"
             />
             <button

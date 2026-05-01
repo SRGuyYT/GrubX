@@ -9,6 +9,7 @@ import { MovieCard } from "@/components/media/MovieCard";
 import { useSettingsContext } from "@/context/SettingsContext";
 import { dataLayer } from "@/lib/dataLayer";
 import { queryKeys } from "@/lib/queryKeys";
+import { trackSearchQuery } from "@/lib/recommendationEngine";
 import { getClientMediaPage } from "@/lib/tmdb/client";
 import type { MediaItem, MediaPage, SearchTarget } from "@/types/media";
 
@@ -96,6 +97,12 @@ export default function SearchPage() {
     window.addEventListener("grubx:focus-search", focusInput);
     return () => window.removeEventListener("grubx:focus-search", focusInput);
   }, [settings.autoFocusSearch]);
+
+  useEffect(() => {
+    if (debouncedQuery.length > 1) {
+      trackSearchQuery(debouncedQuery);
+    }
+  }, [debouncedQuery]);
 
   const searchQuery = useQuery({
     queryKey: queryKeys.search(target, debouncedQuery),

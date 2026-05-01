@@ -32,6 +32,9 @@ export function SpotifyConsole() {
   const [url, setUrl] = useState("");
   const [embedUrl, setEmbedUrl] = useState("");
   const [error, setError] = useState("");
+  const [spotifyFailed, setSpotifyFailed] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -43,6 +46,9 @@ export function SpotifyConsole() {
     }
 
     setError("");
+    setSpotifyFailed(false);
+    setShowFallback(false);
+    setRetryToken((value) => value + 1);
     setEmbedUrl(nextEmbed);
   };
 
@@ -76,13 +82,68 @@ export function SpotifyConsole() {
 
       <div className="min-h-[360px] overflow-hidden rounded-[1rem] border border-white/10 bg-black">
         {embedUrl ? (
-          <ExternalEmbedFrame src={embedUrl} title="Spotify embed" className="h-[420px] w-full border-0" />
+          <ExternalEmbedFrame
+            key={`${embedUrl}-${retryToken}`}
+            src={embedUrl}
+            title="Spotify embed"
+            className="h-[420px] w-full border-0"
+            onError={() => setSpotifyFailed(true)}
+          />
         ) : (
           <div className="grid min-h-[360px] place-items-center px-6 text-center text-sm text-[var(--muted)]">
             Your Spotify embed will appear here.
           </div>
         )}
       </div>
+
+      {embedUrl ? (
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setSpotifyFailed(false);
+              setRetryToken((value) => value + 1);
+            }}
+            className="rounded-full bg-white px-5 py-3 text-sm font-bold text-black transition hover:brightness-95"
+          >
+            Retry Spotify
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowFallback((value) => !value)}
+            className="rounded-full border border-white/10 bg-white/6 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20"
+          >
+            Spotify not working? Try this instead
+          </button>
+          <a
+            href={url || "https://open.spotify.com/"}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full border border-white/10 bg-white/6 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20"
+          >
+            Open as link
+          </a>
+        </div>
+      ) : null}
+
+      {spotifyFailed || showFallback ? (
+        <div className="liquid-glass-soft overflow-hidden rounded-[1rem] border border-white/10 bg-white/[0.035]">
+          <div className="border-b border-white/10 px-5 py-4">
+            <p className="text-sm font-semibold text-white">Spotify not working? Try this instead</p>
+          </div>
+          <ExternalEmbedFrame src="https://audiomack.com/" title="Audiomack fallback" className="h-[440px] w-full border-0" />
+          <div className="border-t border-white/10 px-5 py-4">
+            <a
+              href="https://audiomack.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-semibold text-white underline decoration-white/30 underline-offset-4"
+            >
+              Open Audiomack as a link
+            </a>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

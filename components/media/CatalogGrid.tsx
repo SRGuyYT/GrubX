@@ -5,11 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { FilterPanel } from "@/components/filters/FilterPanel";
 import { LoadingState } from "@/components/feedback/LoadingState";
-import { GenreFilter } from "@/components/media/GenreFilter";
 import { MovieCard } from "@/components/media/MovieCard";
+import { MediaRecommendationSections } from "@/components/recommendations/MediaRecommendationSections";
+import { useSettingsContext } from "@/context/SettingsContext";
+import { filterByYear, useFilters } from "@/hooks/useFilters";
 import { useInfiniteMedia } from "@/hooks/useInfiniteMedia";
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { queryKeys } from "@/lib/queryKeys";
+import { mediaItemToRecommendationItem, trackSearchQuery } from "@/lib/recommendationEngine";
 import { getClientGenres } from "@/lib/tmdb/client";
 import type { MediaItem, MediaType } from "@/types/media";
 
@@ -24,11 +29,12 @@ export function CatalogGrid({
   description: string;
   allowSearch?: boolean;
 }) {
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [results, setResults] = useState<MediaItem[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const { settings } = useSettingsContext();
+  const { filters, actions, yearOptions, hasActiveFilters } = useFilters({ startYear: 1980, endYear: new Date().getFullYear() });
 
   const genresQuery = useQuery({
     queryKey: queryKeys.genres(mediaType),
@@ -38,7 +44,10 @@ export function CatalogGrid({
 
   const mediaQuery = useInfiniteMedia({
     mediaType,
-    genre: selectedGenre,
+    genres: filters.genres,
+    ratings: filters.ratings,
+    yearFrom: filters.yearFrom,
+    yearTo: filters.yearTo,
     query: allowSearch ? searchQuery : undefined,
     enabled: !allowSearch || searchQuery.trim().length > 0,
   });
@@ -48,6 +57,24 @@ export function CatalogGrid({
     setResults(mediaQuery.items);
   }, [mediaQuery.data?.pages.length, mediaQuery.items]);
 
+  const filteredResults = useMemo(() => {
+    const yearFiltered = filterByYear(results, filters, (item) => {
+      if (!item.releaseDate) {
+        return null;
+      }
+      const year = Number(item.releaseDate.slice(0, 4));
+      return Number.isFinite(year) ? year : null;
+    });
+
+    if (!allowSearch || filters.genres.length === 0) {
+      return yearFiltered;
+    }
+
+    return yearFiltered.filter((item) =>
+      filters.genres.every((genreId) => item.genreIds.includes(Number(genreId))),
+    );
+  }, [allowSearch, filters, results]);
+
   const subtitle = useMemo(() => {
     if (!allowSearch) {
       return description;
@@ -55,6 +82,14 @@ export function CatalogGrid({
 
     return searchQuery ? `Results for "${searchQuery}"` : description;
   }, [allowSearch, description, searchQuery]);
+
+  const recommendations = useRecommendations({
+    content: filteredResults,
+    filters,
+    toRecommendationItem: mediaItemToRecommendationItem,
+    mediaType,
+    enabled: settings.recommendationsEnabled,
+  });
 
   const resetAndScroll = () => {
     setPage(1);
@@ -64,16 +99,18 @@ export function CatalogGrid({
     }
   };
 
-  const handleGenreChange = (genre: string | null) => {
-    resetAndScroll();
-    setSelectedGenre(genre);
-  };
-
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const nextQuery = searchInput.trim();
     resetAndScroll();
-    setSearchQuery(searchInput.trim());
+    setSearchQuery(nextQuery);
+    trackSearchQuery(nextQuery);
   };
+
+  useEffect(() => {
+    resetAndScroll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.genres.join(","), filters.ratings.join(","), filters.yearFrom, filters.yearTo]);
 
   return (
     <section className="page-shell py-8 md:py-12 xl:py-16">
@@ -103,10 +140,12 @@ export function CatalogGrid({
             </form>
           ) : null}
 
-          <GenreFilter
-            genres={genresQuery.data ?? []}
-            selectedGenre={selectedGenre}
-            onChange={handleGenreChange}
+          <FilterPanel
+            genres={(genresQuery.data ?? []).map((genre) => ({ id: String(genre.id), name: genre.name }))}
+            filters={filters}
+            actions={actions}
+            yearOptions={yearOptions}
+            hasActiveFilters={hasActiveFilters}
           />
           </div>
       </div>
@@ -118,12 +157,18 @@ export function CatalogGrid({
           />
         ) : mediaQuery.isPending ? (
           <LoadingState title="Loading titles" description="Bringing the next shelf into view." />
-        ) : results.length === 0 ? (
+        ) : filteredResults.length === 0 ? (
           <EmptyState title="No titles found" description="Try another genre or search phrase." />
         ) : (
           <>
+            {settings.recommendationsEnabled ? (
+              <div className="mb-10">
+                <MediaRecommendationSections recommendations={recommendations} />
+              </div>
+            ) : null}
+
             <div className="grid grid-cols-2 gap-[var(--card-gap)] sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
-              {results.map((item) => (
+              {filteredResults.map((item) => (
                 <MovieCard key={`${item.mediaType}-${item.id}`} media={item} />
               ))}
             </div>

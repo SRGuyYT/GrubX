@@ -6,8 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, LoaderCircle, Radio, ShieldAlert, Signal, Tv2, X } from "lucide-react";
 
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { FilterPanel } from "@/components/filters/FilterPanel";
 import { LoadingState } from "@/components/feedback/LoadingState";
+import { MediaPlayer } from "@/components/media/MediaPlayer";
+import { LiveRecommendationSections } from "@/components/recommendations/LiveRecommendationSections";
 import { useSettingsContext } from "@/context/SettingsContext";
+import { filterByYear, useFilters } from "@/hooks/useFilters";
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { cn } from "@/lib/cn";
 import { dataLayer } from "@/lib/dataLayer";
 import {
@@ -19,6 +24,7 @@ import {
   resolveLiveBadgeUrl,
   resolveLivePosterUrl,
 } from "@/lib/live/client";
+import { liveMatchToRecommendationItem, trackClickedItem, trackViewedItem } from "@/lib/recommendationEngine";
 import type { LiveMatch, LiveMatchScope, LiveSource } from "@/types/live";
 
 const scopeOptions: Array<{ id: LiveMatchScope; label: string; description: string }> = [
@@ -29,12 +35,12 @@ const scopeOptions: Array<{ id: LiveMatchScope; label: string; description: stri
 export default function LiveTVPage() {
   const { settings } = useSettingsContext();
   const [scope, setScope] = useState<LiveMatchScope>("live");
-  const [selectedSport, setSelectedSport] = useState("all");
   const [popularOnly, setPopularOnly] = useState(false);
   const [activeMatch, setActiveMatch] = useState<LiveMatch | null>(null);
   const [activeSource, setActiveSource] = useState<LiveSource | null>(null);
   const [selectedStreamNo, setSelectedStreamNo] = useState<number | null>(null);
   const [controlsUnlocked, setControlsUnlocked] = useState(false);
+  const { filters, actions, yearOptions, hasActiveFilters } = useFilters({ startYear: 2020, endYear: new Date().getFullYear() + 1 });
 
   const sportsQuery = useQuery({
     queryKey: ["live", "sports"],
@@ -51,12 +57,22 @@ export default function LiveTVPage() {
 
   const filteredMatches = useMemo(() => {
     const items = matchesQuery.data ?? [];
-    if (selectedSport === "all") {
-      return items;
-    }
+    const sportFiltered =
+      filters.genres.length === 0 ? items : items.filter((match) => filters.genres.includes(match.category));
+    return filterByYear(sportFiltered, filters, (match) => {
+      const year = new Date(match.date).getFullYear();
+      return Number.isFinite(year) ? year : null;
+    });
+  }, [filters, matchesQuery.data]);
 
-    return items.filter((match) => match.category === selectedSport);
-  }, [matchesQuery.data, selectedSport]);
+  const recommendations = useRecommendations({
+    content: filteredMatches,
+    filters,
+    toRecommendationItem: liveMatchToRecommendationItem,
+    mediaType: "live",
+    limit: 9,
+    enabled: settings.recommendationsEnabled,
+  });
 
   useEffect(() => {
     if (!activeMatch) {
@@ -68,6 +84,12 @@ export default function LiveTVPage() {
     setActiveSource(null);
     setSelectedStreamNo(null);
     setControlsUnlocked(false);
+  }, [activeMatch]);
+
+  useEffect(() => {
+    if (activeMatch) {
+      trackViewedItem(liveMatchToRecommendationItem(activeMatch));
+    }
   }, [activeMatch]);
 
   const bestSourceQuery = useQuery({
@@ -155,6 +177,11 @@ export default function LiveTVPage() {
     setControlsUnlocked(false);
   };
 
+  const openMatch = (match: LiveMatch) => {
+    trackClickedItem(liveMatchToRecommendationItem(match));
+    setActiveMatch(match);
+  };
+
   return (
     <div className="pb-14 md:pb-16">
       <section className="relative overflow-hidden border-b border-white/8">
@@ -163,7 +190,7 @@ export default function LiveTVPage() {
 
         <div className="page-shell relative z-10 py-12 md:py-14">
           <div className="liquid-glass rounded-[2.2rem] px-6 py-8 md:px-8 md:py-9">
-            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--accent)]">Live TV</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.34em] text-[var(--accent)]">Live Sports</p>
             <h1 className="mt-4 text-5xl font-bold leading-none sm:text-6xl md:text-7xl">Matchday Control Room</h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[var(--muted)] sm:text-lg">
               Jump into live events, scan the schedule, and choose the stream that feels best on your screen.
@@ -223,35 +250,20 @@ export default function LiveTVPage() {
           </p>
         </div>
 
-        <div className="flex gap-2.5 overflow-x-auto pb-3 pt-1 scrollbar-hidden md:gap-3">
-          <button
-            type="button"
-            onClick={() => setSelectedSport("all")}
-            className={cn(
-              "rounded-full border px-4 py-2.5 text-sm transition",
-              selectedSport === "all"
-                ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
-            )}
-          >
-            All sports
-          </button>
-          {(sportsQuery.data ?? []).map((sport) => (
-            <button
-              key={sport.id}
-              type="button"
-              onClick={() => setSelectedSport(sport.id)}
-              className={cn(
-                "rounded-full border px-4 py-2.5 text-sm whitespace-nowrap transition",
-                selectedSport === sport.id
-                  ? "border-[var(--accent)] bg-[var(--accent-soft)] text-white"
-                  : "border-white/10 bg-white/5 text-[var(--muted)] hover:border-white/20 hover:text-white",
-              )}
-            >
-              {sport.name}
-            </button>
-          ))}
-        </div>
+        <FilterPanel
+          title="Live Sports Filters"
+          genreLabel="Sports Types"
+          genres={(sportsQuery.data ?? []).map((sport) => ({ id: sport.id, name: sport.name }))}
+          filters={filters}
+          actions={actions}
+          yearOptions={yearOptions}
+          showRatings={false}
+          hasActiveFilters={hasActiveFilters}
+        />
+
+        {settings.recommendationsEnabled && filteredMatches.length > 0 ? (
+          <LiveRecommendationSections recommendations={recommendations} onOpenMatch={openMatch} />
+        ) : null}
 
         {matchesQuery.isPending ? (
           <LoadingState title="Loading live matches" description="Bringing the latest schedule into view." />
@@ -278,7 +290,7 @@ export default function LiveTVPage() {
                 <article key={match.id} className="liquid-glass-soft overflow-hidden rounded-[1.7rem] border border-white/8 p-3 md:rounded-[1.85rem]">
                   <button
                     type="button"
-                    onClick={() => setActiveMatch(match)}
+                    onClick={() => openMatch(match)}
                     className="group block w-full text-left"
                   >
                     <div className="relative aspect-video overflow-hidden rounded-[1.35rem] border border-white/8">
@@ -374,13 +386,11 @@ export default function LiveTVPage() {
                   </div>
                 ) : activeStream?.embedUrl ? (
                   <>
-                    <iframe
+                    <MediaPlayer
+                      variant="embed"
                       src={activeStream.embedUrl}
                       title={`${activeMatch.title} stream`}
                       className={cn("absolute inset-0 h-full w-full border-0", settings.blockPopups && !controlsUnlocked ? "pointer-events-none" : "")}
-                      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                      referrerPolicy="no-referrer"
-                      allowFullScreen
                     />
                     {settings.blockPopups && !controlsUnlocked ? (
                       <button

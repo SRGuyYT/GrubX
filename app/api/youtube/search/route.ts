@@ -17,7 +17,6 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const query = (searchParams.get("q") ?? "").trim().slice(0, 120);
-  const musicMode = searchParams.get("music") === "true";
 
   if (!query) {
     return NextResponse.json({ results: [] });
@@ -29,7 +28,7 @@ export async function GET(request: Request) {
   apiUrl.searchParams.set("type", "video");
   apiUrl.searchParams.set("maxResults", "12");
   apiUrl.searchParams.set("safeSearch", "moderate");
-  apiUrl.searchParams.set("q", musicMode ? `${query} music official audio` : query);
+  apiUrl.searchParams.set("q", query);
 
   try {
     const response = await fetch(apiUrl, { next: { revalidate: 120 } });

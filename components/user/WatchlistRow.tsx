@@ -34,6 +34,7 @@ export function WatchlistRow({
         releaseDate: item.addedAt,
         rating: item.rating,
         voteCount: null,
+        genreIds: [],
       }) satisfies MediaItem,
   );
 

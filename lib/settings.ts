@@ -1,15 +1,25 @@
-import type { Settings } from "@/types/settings";
+import type { CustomProviderSettings, Settings } from "@/types/settings";
 import { DEFAULT_GRUBX_PROVIDER, getGrubXProvider, isProviderAllowed } from "@/lib/grubx/providers";
+import { appConfig } from "@/config/appConfig";
 
 export const SETTINGS_STORAGE_KEY = "grubx_settings";
 export const WATCHLIST_STORAGE_KEY = "grubx_watchlist";
 export const PROGRESS_STORAGE_KEY = "grubx_progress";
 export const SEARCH_STORAGE_KEY = "grubx_search";
-export const UPDATER_STORAGE_KEY = "grubx_updater";
 export const LIVE_HISTORY_STORAGE_KEY = "grubx_recent_live";
 export const STORAGE_EVENT_NAME = "grubx:storage";
 
+const defaultProviderSettings = Object.fromEntries(
+  appConfig.providers.map((provider) => [provider.id, provider.enabled && provider.safety !== "blocked"]),
+);
+
 export const DEFAULT_SETTINGS: Settings = {
+  safeMode: appConfig.SAFE_MODE,
+  popupBlockerStrictness: "medium",
+  recommendationsEnabled: appConfig.featureFlags.recommendations,
+  embedQualityMode: "auto",
+  providerSettings: defaultProviderSettings,
+  customProviders: [],
   autoplayTrailers: false,
   theaterModeDefault: false,
   resumePlayback: true,
@@ -65,7 +75,74 @@ const readProvider = (value: unknown, fallback: Settings["defaultProvider"]) =>
     ? (value as Settings["defaultProvider"])
     : fallback;
 
+const readProviderSettings = (value: unknown) => {
+  const input = typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+  return Object.fromEntries(
+    appConfig.providers.map((provider) => [
+      provider.id,
+      readBoolean(input[provider.id], provider.enabled && provider.safety !== "blocked"),
+    ]),
+  );
+};
+
+const sanitizeCustomProviders = (value: unknown): CustomProviderSettings[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((provider, index): CustomProviderSettings | null => {
+      if (!provider || typeof provider !== "object") {
+        return null;
+      }
+
+      const input = provider as Partial<CustomProviderSettings>;
+      const name = typeof input.name === "string" ? input.name.trim().slice(0, 80) : "";
+      const baseUrl = typeof input.baseUrl === "string" ? input.baseUrl.trim().slice(0, 500) : "";
+      const embedUrlPattern =
+        typeof input.embedUrlPattern === "string" ? input.embedUrlPattern.trim().slice(0, 1000) : "";
+
+      if (!name || !baseUrl || !embedUrlPattern) {
+        return null;
+      }
+
+      try {
+        const parsed = new URL(baseUrl);
+        if (parsed.protocol !== "https:") {
+          return null;
+        }
+      } catch {
+        return null;
+      }
+
+      return {
+        id:
+          typeof input.id === "string" && input.id.trim()
+            ? input.id.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").slice(0, 64)
+            : `custom-${Date.now()}-${index}`,
+        name,
+        baseUrl,
+        embedUrlPattern,
+        enabled: readBoolean(input.enabled, true),
+        supportsMovie: readBoolean(input.supportsMovie, true),
+        supportsTv: readBoolean(input.supportsTv, true),
+      };
+    })
+    .filter((provider): provider is CustomProviderSettings => Boolean(provider))
+    .slice(0, 12);
+};
+
 export const sanitizeSettings = (input?: Partial<Settings> | null): Settings => ({
+  safeMode: readBoolean(input?.safeMode, DEFAULT_SETTINGS.safeMode),
+  popupBlockerStrictness: readEnum(
+    input?.popupBlockerStrictness,
+    ["low", "medium", "high"],
+    DEFAULT_SETTINGS.popupBlockerStrictness,
+  ),
+  recommendationsEnabled: readBoolean(input?.recommendationsEnabled, DEFAULT_SETTINGS.recommendationsEnabled),
+  embedQualityMode: readEnum(input?.embedQualityMode, ["auto", "data-saver", "high"], DEFAULT_SETTINGS.embedQualityMode),
+  providerSettings: readProviderSettings(input?.providerSettings),
+  customProviders: sanitizeCustomProviders(input?.customProviders),
   autoplayTrailers: readBoolean(input?.autoplayTrailers, DEFAULT_SETTINGS.autoplayTrailers),
   theaterModeDefault: readBoolean(input?.theaterModeDefault, DEFAULT_SETTINGS.theaterModeDefault),
   resumePlayback: readBoolean(input?.resumePlayback, DEFAULT_SETTINGS.resumePlayback),

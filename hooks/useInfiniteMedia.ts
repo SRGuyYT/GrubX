@@ -10,6 +10,10 @@ import type { MediaItem, MediaType } from "@/types/media";
 type UseInfiniteMediaInput = {
   mediaType: MediaType;
   genre?: string | null;
+  genres?: string[];
+  ratings?: string[];
+  yearFrom?: number;
+  yearTo?: number;
   query?: string;
   category?: "popular" | "top_rated";
   enabled?: boolean;
@@ -18,6 +22,10 @@ type UseInfiniteMediaInput = {
 export const useInfiniteMedia = ({
   mediaType,
   genre,
+  genres = [],
+  ratings = [],
+  yearFrom,
+  yearTo,
   query,
   category = "popular",
   enabled = true,
@@ -28,6 +36,10 @@ export const useInfiniteMedia = ({
     queryKey: queryKeys.list("catalog", {
       mediaType,
       genre: genre ?? null,
+      genres: genres.join(","),
+      ratings: ratings.join(","),
+      yearFrom,
+      yearTo,
       query: query ?? "",
       category,
     }),
@@ -36,6 +48,10 @@ export const useInfiniteMedia = ({
       getClientMediaPage({
         mediaType,
         genre,
+        genres,
+        ratings,
+        yearFrom,
+        yearTo,
         query,
         category,
         page: pageParam,

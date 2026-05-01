@@ -43,13 +43,6 @@ export type SearchPreferences = {
   lastQuery: string;
 };
 
-export type UpdaterState = {
-  lastCheckedAt: string | null;
-  latestVersion: string | null;
-  dismissedVersion: string | null;
-  lastError: string | null;
-};
-
 export type RecentLiveItem = {
   matchId: string;
   title: string;
@@ -74,8 +67,7 @@ export interface DataLayer {
   toggleWatchlist(item: Omit<WatchlistItem, "addedAt">): Promise<{ saved: boolean; items?: WatchlistItem[] }>;
   loadSearchPreferences(): Promise<SearchPreferences>;
   saveSearchPreferences(next: Partial<SearchPreferences>): Promise<SearchPreferences>;
-  loadUpdaterState(): Promise<UpdaterState>;
-  saveUpdaterState(next: Partial<UpdaterState>): Promise<UpdaterState>;
   loadRecentLive(): Promise<RecentLiveItem[]>;
   saveRecentLive(item: RecentLiveItem): Promise<RecentLiveItem[]>;
+  clearAllLocalData(): Promise<Settings>;
 }

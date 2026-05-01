@@ -18,12 +18,18 @@ export const getTrendingHero = async (): Promise<MediaPage> => {
 export const getServerMediaPage = async (options: {
   mediaType: MediaType;
   genre?: string | null;
+  genres?: string[];
+  ratings?: string[];
+  yearFrom?: number;
+  yearTo?: number;
   page?: number;
   query?: string;
   category?: "popular" | "top_rated";
   revalidate?: number;
 }): Promise<MediaPage> => {
-  const { mediaType, genre, page = 1, query, category = "popular", revalidate = 300 } = options;
+  const { mediaType, genre, genres = [], ratings = [], yearFrom, yearTo, page = 1, query, category = "popular", revalidate = 300 } = options;
+  const selectedGenres = genres.length > 0 ? genres : genre ? [genre] : [];
+  const selectedRatings = ratings.filter(Boolean);
 
   if (query && query.trim().length > 0) {
     const { payload } = await fetchTmdbJson<Record<string, unknown>>(
@@ -34,10 +40,27 @@ export const getServerMediaPage = async (options: {
     return normalizeMediaPage(payload, mediaType);
   }
 
-  if (genre) {
+  if (selectedGenres.length > 0 || selectedRatings.length > 0 || yearFrom || yearTo) {
+    const datePrefix = mediaType === "movie" ? "primary_release_date" : "first_air_date";
+    const ratingParams =
+      mediaType === "movie"
+        ? {
+            certification_country: selectedRatings.length > 0 ? "US" : undefined,
+            certification: selectedRatings.length > 0 ? selectedRatings.join("|") : undefined,
+          }
+        : {
+            with_content_rating: selectedRatings.length > 0 ? selectedRatings.join("|") : undefined,
+          };
     const { payload } = await fetchTmdbJson<Record<string, unknown>>(
       `/discover/${mediaType}`,
-      { with_genres: genre, page, sort_by: "popularity.desc" },
+      {
+        with_genres: selectedGenres.length > 0 ? selectedGenres.join(",") : undefined,
+        page,
+        sort_by: "popularity.desc",
+        [`${datePrefix}.gte`]: yearFrom ? `${yearFrom}-01-01` : undefined,
+        [`${datePrefix}.lte`]: yearTo ? `${yearTo}-12-31` : undefined,
+        ...ratingParams,
+      },
       revalidate,
     );
     return normalizeMediaPage(payload, mediaType);

@@ -4,10 +4,14 @@ export function ExternalEmbedFrame({
   src,
   title,
   className,
+  onLoad,
+  onError,
 }: {
   src: string;
   title: string;
   className?: string;
+  onLoad?: () => void;
+  onError?: () => void;
 }) {
   return (
     <iframe
@@ -18,6 +22,8 @@ export function ExternalEmbedFrame({
       allowFullScreen
       referrerPolicy="no-referrer"
       sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+      onLoad={onLoad}
+      onError={onError}
     />
   );
 }

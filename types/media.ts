@@ -17,6 +17,7 @@ export type MediaItem = {
   releaseDate: string | null;
   rating: number | null;
   voteCount: number | null;
+  genreIds: number[];
 };
 
 export type CastMember = {

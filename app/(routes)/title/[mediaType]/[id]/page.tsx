@@ -3,6 +3,8 @@ import { CalendarDays, Clock3, Layers3, Star } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { TitleActions } from "@/components/media/TitleActions";
+import { RecommendationViewTracker } from "@/components/recommendations/RecommendationViewTracker";
+import { mediaDetailsToRecommendationItem } from "@/lib/recommendationEngine";
 import { getServerMediaDetails } from "@/lib/tmdb/server";
 import type { MediaType } from "@/types/media";
 
@@ -48,6 +50,8 @@ export default async function TitlePage({
 
   return (
     <div className="pb-14">
+      <RecommendationViewTracker item={mediaDetailsToRecommendationItem(media)} />
+
       <section className="relative -mt-[calc(4.75rem+env(safe-area-inset-top))] overflow-hidden border-b border-white/8 md:-mt-[calc(5.5rem+env(safe-area-inset-top))]">
         <div className="absolute inset-0">
           <Image

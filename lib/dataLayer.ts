@@ -5,7 +5,6 @@ import {
   PROGRESS_STORAGE_KEY,
   SEARCH_STORAGE_KEY,
   SETTINGS_STORAGE_KEY,
-  UPDATER_STORAGE_KEY,
   LIVE_HISTORY_STORAGE_KEY,
   WATCHLIST_STORAGE_KEY,
   removeLocalValue,
@@ -19,20 +18,12 @@ import type {
   PlaybackProgress,
   RecentLiveItem,
   SearchPreferences,
-  UpdaterState,
   WatchlistItem,
 } from "@/types/data-layer";
 
 const DEFAULT_SEARCH_PREFERENCES: SearchPreferences = {
   target: "all",
   lastQuery: "",
-};
-
-const DEFAULT_UPDATER_STATE: UpdaterState = {
-  lastCheckedAt: null,
-  latestVersion: null,
-  dismissedVersion: null,
-  lastError: null,
 };
 
 const MAX_RECENT_LIVE_ITEMS = 12;
@@ -165,23 +156,6 @@ export const dataLayer: DataLayer = {
     return merged;
   },
 
-  async loadUpdaterState() {
-    return {
-      ...DEFAULT_UPDATER_STATE,
-      ...readLocalJson<UpdaterState>(UPDATER_STORAGE_KEY, DEFAULT_UPDATER_STATE),
-    };
-  },
-
-  async saveUpdaterState(next) {
-    const merged = {
-      ...DEFAULT_UPDATER_STATE,
-      ...readLocalJson<UpdaterState>(UPDATER_STORAGE_KEY, DEFAULT_UPDATER_STATE),
-      ...next,
-    };
-    writeLocalJson(UPDATER_STORAGE_KEY, merged);
-    return merged;
-  },
-
   async loadRecentLive() {
     return getRecentLive().sort((left, right) => right.watchedAt.localeCompare(left.watchedAt));
   },
@@ -203,5 +177,20 @@ export const dataLayer: DataLayer = {
 
     writeLocalJson(LIVE_HISTORY_STORAGE_KEY, nextItems);
     return nextItems;
+  },
+
+  async clearAllLocalData() {
+    if (typeof window !== "undefined") {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
+
+      if ("caches" in window) {
+        const cacheKeys = await window.caches.keys();
+        await Promise.all(cacheKeys.map((key) => window.caches.delete(key)));
+      }
+    }
+
+    writeLocalJson(SETTINGS_STORAGE_KEY, DEFAULT_SETTINGS);
+    return DEFAULT_SETTINGS;
   },
 };

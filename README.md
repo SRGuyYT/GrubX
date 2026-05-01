@@ -4,14 +4,14 @@ GrubX is a local-first streaming shell built with Next.js App Router. It focuses
 
 ## Highlights
 
-- Local-only watchlist, continue watching, settings, and updater state
+- Local-only watchlist, continue watching, settings, and recommendation preferences
 - Responsive shell:
   - desktop sidebar
   - compact tablet rail
   - mobile top bar + bottom navigation
 - Debounced Search All with cached movie and TV results
 - Offline-first app shell with a service worker
-- Built-in updater that compares your current version with the GrubX GitHub repo
+- Local control panel for safety, providers, cache, playback, and recommendations
 - Popup-sandboxed live sports and controlled external fetches only
 
 ## Stack
@@ -55,13 +55,13 @@ Or use:
 - `context/SettingsContext.tsx` owns the local settings state
 - `lib/dataLayer.ts` is the single local persistence boundary
 - `public/sw.js` provides offline-first shell caching
-- `app/api/update/route.ts` checks the fixed GitHub repo for newer tags
+- `config/appConfig.ts` centralizes feature flags, provider defaults, and safe browsing policy
 
 ## Security Notes
 
 - Authentication and Matrix/Firebase bridging are removed temporarily
 - The former bridge route is deleted, removing the SSRF surface entirely
-- External requests are limited to fixed TMDB, Streamed, VidKing, and GitHub update endpoints
+- External requests are limited to fixed TMDB, Streamed, VidKing, Matrix alert, YouTube, TikTok, Spotify, and Audiomack endpoints
 - GitHub Actions workflow permissions are restricted to `contents: read`
 
 ## Build Verification

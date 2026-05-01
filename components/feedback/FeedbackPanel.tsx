@@ -19,7 +19,7 @@ const areas = [
   { value: "player", label: "Player" },
   { value: "movies", label: "Movies" },
   { value: "tv", label: "TV" },
-  { value: "live", label: "Live TV" },
+  { value: "live", label: "Live Sports" },
   { value: "search", label: "Search" },
   { value: "settings", label: "Settings" },
   { value: "watchlist", label: "Watchlist" },

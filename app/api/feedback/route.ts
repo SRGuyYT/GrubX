@@ -45,7 +45,7 @@ const AREA_LABELS: Record<(typeof AREAS)[number], string> = {
   player: "Player",
   movies: "Movies",
   tv: "TV",
-  live: "Live TV",
+  live: "Live Sports",
   search: "Search",
   settings: "Settings",
   watchlist: "Watchlist",

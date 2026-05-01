@@ -163,6 +163,12 @@ export async function GET(request: Request) {
     const progress = progressValue ? Math.max(0, Number(progressValue)) : null;
     const requestedProvider = searchParams.get("provider")?.trim().toLowerCase() ?? null;
     const allowLimitedProtectionProviders = searchParams.get("allowLimitedProtectionProviders") === "true";
+    const enabledProviders = new Set(
+      (searchParams.get("enabledProviders") ?? "")
+        .split(",")
+        .map((provider) => provider.trim().toLowerCase())
+        .filter(Boolean),
+    );
     const providerOptions = parsePlaybackOptions(searchParams);
 
     providerOptions.autoplay = providerOptions.autoplay ?? "true";
@@ -178,7 +184,9 @@ export async function GET(request: Request) {
 
     const providers = requestedProvider
       ? [getProviderById(requestedProvider)].filter((provider): provider is GrubXProvider => Boolean(provider))
-      : getEnabledProviders(mediaType, { allowLimitedProtectionProviders });
+      : getEnabledProviders(mediaType, { allowLimitedProtectionProviders }).filter(
+          (provider) => enabledProviders.size === 0 || enabledProviders.has(provider.id),
+        );
 
     if (
       requestedProvider &&

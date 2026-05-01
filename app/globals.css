@@ -144,6 +144,10 @@ a {
   display: none !important;
 }
 
+body.grubx-player-open .site-navbar {
+  display: none !important;
+}
+
 .player-modal-pop {
   transform-origin: center center;
   animation: player-modal-pop 180ms ease-out both;

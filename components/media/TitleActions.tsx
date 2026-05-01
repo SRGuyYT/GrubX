@@ -10,6 +10,11 @@ import { useSettingsContext } from "@/context/SettingsContext";
 import { useWatchlistSubscription } from "@/hooks/useWatchlistSubscription";
 import { dataLayer } from "@/lib/dataLayer";
 import { queryKeys } from "@/lib/queryKeys";
+import {
+  mediaDetailsToRecommendationItem,
+  trackClickedItem,
+  trackSavedForLater,
+} from "@/lib/recommendationEngine";
 import type { MediaDetails } from "@/types/media";
 
 const TrailerModal = dynamic(
@@ -17,8 +22,8 @@ const TrailerModal = dynamic(
   { ssr: false },
 );
 
-const PlaybackTheater = dynamic(
-  () => import("@/components/media/PlaybackTheater").then((module) => module.PlaybackTheater),
+const MediaPlayer = dynamic(
+  () => import("@/components/media/MediaPlayer").then((module) => module.MediaPlayer),
   { ssr: false },
 );
 
@@ -52,6 +57,9 @@ export function TitleActions({ media }: { media: MediaDetails }) {
     });
 
     queryClient.setQueryData(queryKeys.watchlist, result.items ?? []);
+    if (result.saved) {
+      trackSavedForLater(mediaDetailsToRecommendationItem(media));
+    }
     toast.success(result.saved ? "Added to watchlist." : "Removed from watchlist.");
   };
 
@@ -62,7 +70,10 @@ export function TitleActions({ media }: { media: MediaDetails }) {
       <div className="relative z-20 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <button
           type="button"
-          onClick={() => setPlayerOpen(true)}
+          onClick={() => {
+            trackClickedItem(mediaDetailsToRecommendationItem(media));
+            setPlayerOpen(true);
+          }}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-black transition hover:brightness-95 active:scale-[0.98]"
         >
           <Play className="size-4 fill-current" />
@@ -95,7 +106,7 @@ export function TitleActions({ media }: { media: MediaDetails }) {
         mediaId={media.id}
         title={media.title}
       />
-      <PlaybackTheater
+      <MediaPlayer
         open={playerOpen}
         onClose={() => setPlayerOpen(false)}
         mediaType={media.mediaType}
