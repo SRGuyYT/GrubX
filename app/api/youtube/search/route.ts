@@ -57,6 +57,12 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const query = (searchParams.get("q") ?? "").trim().slice(0, 120);
   const mode = searchParams.get("mode") === "shorts" ? "shorts" : "videos";
+  const safeSearch = ["strict", "moderate", "off"].includes(searchParams.get("safeSearch") ?? "")
+    ? searchParams.get("safeSearch")!
+    : "moderate";
+  const maxResults = ["8", "12", "20"].includes(searchParams.get("maxResults") ?? "")
+    ? searchParams.get("maxResults")!
+    : "12";
 
   if (!query) {
     return NextResponse.json({ results: [] });
@@ -84,8 +90,8 @@ export async function GET(request: NextRequest) {
   const apiUrl = new URL(YOUTUBE_SEARCH_ENDPOINT);
   apiUrl.searchParams.set("part", "snippet");
   apiUrl.searchParams.set("type", "video");
-  apiUrl.searchParams.set("maxResults", "16");
-  apiUrl.searchParams.set("safeSearch", "moderate");
+  apiUrl.searchParams.set("maxResults", maxResults);
+  apiUrl.searchParams.set("safeSearch", safeSearch);
   apiUrl.searchParams.set("videoEmbeddable", "true");
   apiUrl.searchParams.set("q", mode === "shorts" && !query.toLowerCase().includes("shorts") ? `${query} shorts` : query);
   if (mode === "shorts") {

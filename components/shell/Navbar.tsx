@@ -18,24 +18,28 @@ import {
 } from "lucide-react";
 
 import { LiveClock } from "@/components/shell/LiveClock";
+import { useSettingsContext } from "@/context/SettingsContext";
 import { cn } from "@/lib/cn";
+import type { FeatureToggles } from "@/types/settings";
 
 type NavItem = {
   href: string;
   label: string;
   icon: typeof Home;
+  feature?: keyof FeatureToggles;
+  external?: boolean;
 };
 
 const navItems: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/movies", label: "Movies", icon: Clapperboard },
-  { href: "/tv", label: "TV", icon: Tv },
-  { href: "/live", label: "Live Sports", icon: MonitorPlay },
-  { href: "/youtube", label: "YouTube", icon: Youtube },
-  { href: "/tiktok", label: "TikTok", icon: Video },
-  { href: "/spotify", label: "Spotify", icon: Music },
-  { href: "/ai", label: "AI Server", icon: Bot },
-  { href: "/search", label: "Search", icon: Search },
+  { href: "/movies", label: "Movies", icon: Clapperboard, feature: "movies" },
+  { href: "/tv", label: "TV", icon: Tv, feature: "tv" },
+  { href: "/live", label: "Live TV", icon: MonitorPlay, feature: "live" },
+  { href: "/youtube", label: "YouTube", icon: Youtube, feature: "youtube" },
+  { href: "/tiktok", label: "TikTok", icon: Video, feature: "tiktok" },
+  { href: "/spotify", label: "Spotify", icon: Music, feature: "spotify" },
+  { href: "/ai", label: "AI Server", icon: Bot, feature: "aiServer" },
+  { href: "/search", label: "Search", icon: Search, feature: "search" },
   { href: "/settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -54,6 +58,8 @@ function NavButton({
   return (
     <Link
       href={item.href}
+      target={item.external ? "_blank" : undefined}
+      rel={item.external ? "noopener noreferrer" : undefined}
       className={cn(
         "group relative flex min-h-11 min-w-0 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-full border px-3 py-2.5 text-sm font-semibold transition md:min-h-0 lg:px-3 xl:px-4",
         active
@@ -83,7 +89,17 @@ function BrandBlock() {
 
 export function Navbar() {
   const pathname = usePathname();
-  const nav = useMemo(() => navItems, []);
+  const { settings } = useSettingsContext();
+  const nav = useMemo(() => {
+    const aiServerUrl = process.env.NEXT_PUBLIC_AI_SERVER_URL || "https://xthat.sky0cloud.dpdns.org";
+    return navItems
+      .filter((item) => !item.feature || settings.featureToggles[item.feature])
+      .map((item) =>
+        item.feature === "aiServer" && settings.aiOpenMode === "new-tab"
+          ? { ...item, href: aiServerUrl, external: true }
+          : item,
+      );
+  }, [settings.aiOpenMode, settings.featureToggles]);
   const [playerChromeHidden, setPlayerChromeHidden] = useState(false);
 
   useEffect(() => {

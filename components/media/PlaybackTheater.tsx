@@ -4,7 +4,7 @@ import { type FormEvent, useEffect, useLayoutEffect, useMemo, useRef, useState }
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, AlertTriangle, Eye, EyeOff, Flag, Maximize2, MessageSquare, Pause, Play, RefreshCw, Server, ShieldAlert, VolumeX, X } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Eye, EyeOff, Flag, Maximize2, MessageSquare, MonitorPlay, Pause, Play, RefreshCw, Server, ShieldAlert, VolumeX, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/cn";
@@ -205,6 +205,7 @@ export function PlaybackTheater({
       settings.autoplayPlayback,
       settings.allowLimitedProtectionProviders,
       settings.embedQualityMode,
+      settings.featureToggles.thirdPartyPlayback,
       settings.providerSettings,
       settings.uiTheme,
       progressQuery.data?.currentTime ?? null,
@@ -257,7 +258,7 @@ export function PlaybackTheater({
         candidates: GrubXServerCandidate[];
       };
     },
-    enabled: open && playbackConsentReady,
+    enabled: open && playbackConsentReady && settings.featureToggles.thirdPartyPlayback,
     staleTime: 1000 * 60,
   });
 
@@ -392,7 +393,7 @@ export function PlaybackTheater({
     }
 
     setIsTheaterMode(settings.theaterModeDefault);
-    setSelectedProvider(readPreferredProvider() as GrubXProviderId | null);
+    setSelectedProvider((readPreferredProvider() ?? settings.defaultProvider) as GrubXProviderId | null);
     setManualProvider(false);
     setControlsUnlocked(false);
     setControlDock("top");
@@ -429,7 +430,7 @@ export function PlaybackTheater({
       return;
     }
 
-    if (!hasRiskConsent()) {
+    if (settings.showPlaybackWarnings && !hasRiskConsent()) {
       setPlaybackConsentReady(false);
       setShowAgeGate(false);
       setShowRiskConsent(true);
@@ -439,7 +440,7 @@ export function PlaybackTheater({
     setShowAgeGate(false);
     setShowRiskConsent(false);
     setPlaybackConsentReady(true);
-  }, [onClose, open, router]);
+  }, [onClose, open, router, settings.showPlaybackWarnings]);
 
   useEffect(() => {
     if (!open || !controlsVisible) {
@@ -680,6 +681,10 @@ export function PlaybackTheater({
 
   const submitProviderReport = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!settings.featureToggles.providerReports) {
+      toast.error("Provider reports are currently turned off.");
+      return;
+    }
     if (!activeCandidate) {
       return;
     }
@@ -872,7 +877,7 @@ export function PlaybackTheater({
                       : "No server selected"}
                 </span>
               </div>
-              {activeCandidate?.compatibilityMode ? (
+              {settings.showPlaybackWarnings && activeCandidate?.compatibilityMode ? (
                 <span className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-red-300/25 bg-red-500/12 px-3 text-xs font-semibold text-red-100 md:px-4">
                   <span className="xl:hidden">Compatibility mode active</span>
                   <span className="hidden xl:inline">
@@ -880,36 +885,44 @@ export function PlaybackTheater({
                   </span>
                 </span>
               ) : null}
-              <Link
-                href="/safety"
-                className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
-              >
-                Safety Info
-              </Link>
-              <button
-                type="button"
-                onClick={() => setServerSheetOpen(true)}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
-              >
-                <Server className="size-4" />
-                Switch Server
-              </button>
-              <button
-                type="button"
-                onClick={() => setReportOpen(true)}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
-              >
-                <Flag className="size-4 text-[var(--accent)]" />
-                Report
-              </button>
-              <button
-                type="button"
-                onClick={() => setFeedbackOpen(true)}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
-              >
-                <MessageSquare className="size-4" />
-                Feedback
-              </button>
+              {settings.featureToggles.safetyLegalPages ? (
+                <Link
+                  href="/safety"
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+                >
+                  Safety Info
+                </Link>
+              ) : null}
+              {settings.enableServerSwitcher ? (
+                <button
+                  type="button"
+                  onClick={() => setServerSheetOpen(true)}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+                >
+                  <Server className="size-4" />
+                  Switch Server
+                </button>
+              ) : null}
+              {settings.featureToggles.providerReports ? (
+                <button
+                  type="button"
+                  onClick={() => setReportOpen(true)}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+                >
+                  <Flag className="size-4 text-[var(--accent)]" />
+                  Report
+                </button>
+              ) : null}
+              {settings.featureToggles.feedbackContact ? (
+                <button
+                  type="button"
+                  onClick={() => setFeedbackOpen(true)}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/8 px-4 text-sm font-semibold text-white transition active:scale-[0.98]"
+                >
+                  <MessageSquare className="size-4" />
+                  Feedback
+                </button>
+              ) : null}
               <div className="inline-flex min-h-11 shrink-0 overflow-hidden rounded-full border border-white/10 bg-white/8">
                 {(["top", "bottom", "hidden"] as PlayerControlDock[]).map((dock) => (
                   <button
@@ -960,11 +973,13 @@ export function PlaybackTheater({
               >
                 <Maximize2 className="size-5" />
               </button>
-              <ScreenMirrorButton
-                target={iframeRef.current}
-                label="Mirror"
-                className="hidden shrink-0 px-4 text-[var(--muted)] md:inline-flex"
-              />
+              {settings.featureToggles.tvModeScreenMirroring ? (
+                <ScreenMirrorButton
+                  target={iframeRef.current}
+                  label="Mirror"
+                  className="hidden shrink-0 px-4 text-[var(--muted)] md:inline-flex"
+                />
+              ) : null}
               <button
                 type="button"
                 onClick={() => setControlsVisible(false)}
@@ -1000,7 +1015,24 @@ export function PlaybackTheater({
         </div>
 
         <div className="absolute inset-0 bg-black">
-            {playerSourceQuery.isPending ? (
+            {!settings.featureToggles.thirdPartyPlayback ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 text-center text-white">
+                <span className="rounded-[1.2rem] border border-white/10 bg-white/8 p-4">
+                  <MonitorPlay className="size-7" />
+                </span>
+                <span className="max-w-xl text-lg font-semibold">Third-party playback is turned off.</span>
+                <span className="max-w-xl text-sm leading-6 text-[var(--muted)]">
+                  You can enable it again from Settings when you want to use movie and TV playback providers.
+                </span>
+                <Link
+                  href="/settings"
+                  onClick={onClose}
+                  className="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black transition hover:brightness-95"
+                >
+                  Open Settings
+                </Link>
+              </div>
+            ) : playerSourceQuery.isPending ? (
               <div className="absolute inset-0 flex items-center justify-center px-8 text-center text-[var(--muted)]">
                 Testing available servers...
               </div>
@@ -1023,20 +1055,24 @@ export function PlaybackTheater({
                   >
                     Try Next Server
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setServerSheetOpen(true)}
-                    className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
-                  >
-                    Switch Server
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setReportOpen(true)}
-                    className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
-                  >
-                    Report Provider
-                  </button>
+                  {settings.enableServerSwitcher ? (
+                    <button
+                      type="button"
+                      onClick={() => setServerSheetOpen(true)}
+                      className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
+                    >
+                      Switch Server
+                    </button>
+                  ) : null}
+                  {settings.featureToggles.providerReports ? (
+                    <button
+                      type="button"
+                      onClick={() => setReportOpen(true)}
+                      className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
+                    >
+                      Report Provider
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ) : activeCandidate.status !== "ready" || iframeFailed || popupSuspected ? (
@@ -1064,23 +1100,27 @@ export function PlaybackTheater({
                   >
                     Try Next Server
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setServerSheetOpen(true)}
-                    className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
-                  >
-                    Switch Server
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setReportReason("popups");
-                      setReportOpen(true);
-                    }}
-                    className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
-                  >
-                    Report Provider
-                  </button>
+                  {settings.enableServerSwitcher ? (
+                    <button
+                      type="button"
+                      onClick={() => setServerSheetOpen(true)}
+                      className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
+                    >
+                      Switch Server
+                    </button>
+                  ) : null}
+                  {settings.featureToggles.providerReports ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReportReason("popups");
+                        setReportOpen(true);
+                      }}
+                      className="rounded-full border border-white/12 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white transition hover:border-white/22"
+                    >
+                      Report Provider
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ) : (
@@ -1118,7 +1158,7 @@ export function PlaybackTheater({
                 </span>
               </button>
             ) : null}
-            {reportOpen ? (
+            {reportOpen && settings.featureToggles.providerReports ? (
               <form
                 onSubmit={submitProviderReport}
                 className="absolute inset-x-3 bottom-3 z-40 max-h-[82dvh] overflow-y-auto rounded-[1.2rem] border border-white/12 bg-[#0d1117]/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(5.5rem+env(safe-area-inset-top))] sm:w-[390px] sm:pb-4"
@@ -1173,7 +1213,7 @@ export function PlaybackTheater({
               </form>
             ) : null}
 
-            {serverSheetOpen ? (
+            {serverSheetOpen && settings.enableServerSwitcher ? (
               <div className="absolute inset-x-3 bottom-3 z-40 max-h-[82dvh] overflow-y-auto rounded-[1.2rem] border border-white/12 bg-[#0d1117]/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(5.5rem+env(safe-area-inset-top))] sm:w-[430px] sm:pb-4">
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div>
@@ -1223,7 +1263,7 @@ export function PlaybackTheater({
               </div>
             ) : null}
 
-            {feedbackOpen ? (
+            {feedbackOpen && settings.featureToggles.feedbackContact ? (
               <form
                 onSubmit={submitFeedback}
                 className="absolute inset-x-3 bottom-3 z-40 max-h-[82dvh] overflow-y-auto rounded-[1.2rem] border border-white/12 bg-[#0d1117]/95 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl backdrop-blur-2xl sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-[calc(5.5rem+env(safe-area-inset-top))] sm:w-[430px] sm:pb-4"

@@ -22,6 +22,7 @@ import { toast } from "sonner";
 
 import { ExternalEmbedFrame } from "@/components/media/ExternalEmbedFrame";
 import { ScreenMirrorButton } from "@/components/media/ScreenMirrorButton";
+import { useSettingsContext } from "@/context/SettingsContext";
 import { useSpotifyWebPlayer } from "@/hooks/useSpotifyWebPlayer";
 import { cn } from "@/lib/cn";
 import type {
@@ -164,6 +165,7 @@ function LinkResult({
 }
 
 export function SpotifyConsole() {
+  const { settings } = useSettingsContext();
   const [session, setSession] = useState<SpotifySessionResponse | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -631,7 +633,11 @@ export function SpotifyConsole() {
           <div className="border-b border-white/10 px-5 py-4">
             <p className="text-sm font-semibold text-white">Spotify not working? Try this instead</p>
           </div>
-          <ExternalEmbedFrame src="https://audiomack.com/" title="Audiomack fallback" className="h-[520px] w-full border-0" />
+          <ExternalEmbedFrame
+            src="https://audiomack.com/"
+            title="Audiomack fallback"
+            className={cn(settings.spotifyEmbedSize === "compact" ? "h-[360px]" : "h-[520px]", "w-full border-0")}
+          />
           <div className="border-t border-white/10 px-5 py-4">
             <a
               href="https://audiomack.com/"

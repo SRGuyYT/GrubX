@@ -24,7 +24,7 @@ export function ContinueWatchingRow({
   const { ready, settings } = useSettingsContext();
   const query = useContinueWatchingSubscription();
 
-  if (!ready || query.isBootstrapping || !settings.showContinueWatching) {
+  if (!ready || query.isBootstrapping || !settings.showContinueWatching || !settings.featureToggles.continueWatching) {
     return null;
   }
 

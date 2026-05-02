@@ -38,7 +38,7 @@ export function WatchlistRow({
       }) satisfies MediaItem,
   );
 
-  if (!ready || query.isBootstrapping || !settings.showWatchlist) {
+  if (!ready || query.isBootstrapping || !settings.showWatchlist || !settings.featureToggles.watchlist) {
     return null;
   }
 

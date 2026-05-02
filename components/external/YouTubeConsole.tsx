@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { ExternalEmbedFrame } from "@/components/media/ExternalEmbedFrame";
 import { ScreenMirrorButton } from "@/components/media/ScreenMirrorButton";
+import { useSettingsContext } from "@/context/SettingsContext";
 import { cn } from "@/lib/cn";
 import { toYouTubeEmbedUrl, toYouTubeWatchUrl } from "@/lib/youtubeEmbed";
 import type { YouTubeSearchItem, YouTubeSessionResponse } from "@/types/external";
@@ -38,6 +39,7 @@ function SetupPanel({ redirectUri }: { redirectUri?: string }) {
 }
 
 export function YouTubeConsole() {
+  const { settings } = useSettingsContext();
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<YouTubeMode>("videos");
   const [results, setResults] = useState<YouTubeSearchItem[]>([]);
@@ -77,7 +79,12 @@ export function YouTubeConsole() {
     event.preventDefault();
     setMessage("");
     startTransition(async () => {
-      const params = new URLSearchParams({ q: query.trim(), mode });
+      const params = new URLSearchParams({
+        q: query.trim(),
+        mode,
+        safeSearch: settings.youtubeSafeSearch,
+        maxResults: String(settings.youtubeResultCount),
+      });
       const response = await fetch(`/api/youtube/search?${params.toString()}`, { credentials: "same-origin" });
       const body = (await response.json().catch(() => null)) as
         | { error?: string; setupRequired?: boolean; results?: YouTubeSearchItem[]; setup?: { redirectUri: string } }
